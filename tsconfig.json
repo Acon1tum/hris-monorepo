@@ -17,9 +17,12 @@
     "emitDecoratorMetadata": true,
     "baseUrl": ".",
     "paths": {
-      "@hris/types": ["./packages/types"],
-      "@hris/utils": ["./packages/utils"],
-      "@hris/db": ["./packages/db"]
+      "@hris/types": ["./packages/types/src"],
+      "@hris/utils": ["./packages/utils/src"],
+      "@hris/db": ["./packages/db/src/client.ts"],
+      "@hris/types/*": ["./packages/types/src/*"],
+      "@hris/utils/*": ["./packages/utils/src/*"],
+      "@hris/db/*": ["./packages/db/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]

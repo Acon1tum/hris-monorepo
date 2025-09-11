@@ -9,7 +9,7 @@
       "@hris/types/*": ["../../packages/types/src/*"],
       "@hris/utils": ["../../packages/utils/src"],
       "@hris/utils/*": ["../../packages/utils/src/*"],
-      "@hris/db": ["../../packages/db/src"],
+      "@hris/db": ["../../packages/db/src/client.ts"],
       "@hris/db/*": ["../../packages/db/src/*"]
     }
   },
