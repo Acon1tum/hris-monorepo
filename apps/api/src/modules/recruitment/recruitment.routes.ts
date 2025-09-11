@@ -1,6 +1,6 @@
-import { Router, type Request, type Response } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 router.get('/', (req, res) => {
   res.json({ message: 'Recruitment API - Under Development' });

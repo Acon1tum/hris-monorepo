@@ -1,7 +1,7 @@
-import { Router, type Request, type Response } from 'express';
+import { Router, type Request, type Response, type Router as ExpressRouter } from 'express';
 
 // Import module routes
-import authRoutes from './modules/auth/auth.routes';
+import { authRoutes } from './modules/auth/auth.routes';
 import employeeRoutes from './modules/employee-self-service/employee-self-service.routes';
 import personnelRoutes from './modules/personnel-information-management/personnel-information-management.routes';
 import leaveRoutes from './modules/leave-management/leave-management.routes';
@@ -15,7 +15,7 @@ import healthRoutes from './modules/health-wellness/health-wellness.routes';
 import reportRoutes from './modules/report-generation/report-generation.routes';
 import adminRoutes from './modules/system-administration/system-administration.routes';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 // API version info
 router.get('/', (req: Request, res: Response) => {

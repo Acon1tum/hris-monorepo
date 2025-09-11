@@ -10,7 +10,6 @@ import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
 import routes from './routes';
 import { config } from './config';
-import { authRoutes } from './modules/auth/auth.routes';
 
 // Load environment variables
 dotenv.config();
@@ -55,7 +54,7 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // API routes
-app.use('/api', authRoutes);
+app.use('/api', routes);
 
 // Error handling middleware
 app.use(notFoundHandler);
