@@ -1,0 +1,37 @@
+{
+  "name": "hris-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HRIS Monorepo with Angular frontend and Express backend",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:apps": "turbo run dev --parallel --filter=api --filter=web",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean",
+    "type-check": "turbo run type-check",
+    "web:dev": "turbo run dev --filter=web",
+    "api:dev": "turbo run dev --filter=api",
+    "db:generate": "turbo run db:generate --filter=db",
+    "db:push": "turbo run db:push --filter=db",
+    "db:migrate": "turbo run db:migrate --filter=db",
+    "db:seed": "turbo run db:seed --filter=db",
+    "db:studio": "turbo run db:studio --filter=db"
+  },
+  "devDependencies": {
+    "@turbo/gen": "^1.10.12",
+    "turbo": "^1.10.12",
+    "typescript": "^5.2.2",
+    "@types/node": "^20.8.0"
+  },
+  "packageManager": "pnpm@8.10.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

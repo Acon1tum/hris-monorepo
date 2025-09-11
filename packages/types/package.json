@@ -1,0 +1,17 @@
+{
+  "name": "@hris/types",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared TypeScript types for HRIS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}
+
