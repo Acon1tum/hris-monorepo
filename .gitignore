@@ -117,4 +117,4 @@ prisma/migrations/
 .history
 .turbo
 node_modules
-
+.angular
