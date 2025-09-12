@@ -1,34 +1,25 @@
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #drawer class="sidenav" fixedInViewport
-      [attr.role]="'navigation'"
-      [mode]="'side'"
-      [opened]="opened">
-    <mat-toolbar>HRIS Menu</mat-toolbar>
-    <mat-nav-list>
-      <a mat-list-item *ngFor="let item of menuItems" [routerLink]="item.route">
-        <mat-icon matListItemIcon>{{item.icon}}</mat-icon>
-        <span matListItemTitle>{{item.name}}</span>
-      </a>
-    </mat-nav-list>
-  </mat-sidenav>
-  <mat-sidenav-content>
-    <mat-toolbar color="primary">
-      <button
-        type="button"
-        aria-label="Toggle sidenav"
-        mat-icon-button
-        (click)="drawer.toggle()">
-        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
-      </button>
-      <span>{{title}}</span>
-      <span class="spacer"></span>
-      <button mat-icon-button>
-        <mat-icon>account_circle</mat-icon>
-      </button>
-    </mat-toolbar>
-    <div class="content">
-      <router-outlet></router-outlet>
+<div class="app-container">
+    <app-header 
+    *ngIf="currentUser$ | async as user"
+      (toggleSidebar)="toggleSidebar()"
+      (logout)="onLogout()"
+      [isSidebarCollapsed]="isSidebarCollapsed"
+      [isSidebarOpenInput]="isSidebarOpen">
+    </app-header>
+    
+  <div class="content-wrapper" *ngIf="currentUser$ | async as user">
+      <app-sidebar 
+        [isOpen]="isSidebarOpen"
+        [isCollapsed]="isSidebarCollapsed"
+        (stateChange)="onSidebarStateChange($event)">
+      </app-sidebar>
+      
+      <!-- Router outlet for authenticated routes -->
+      <main class="main-content">
+        <router-outlet></router-outlet>
+      </main>
     </div>
-  </mat-sidenav-content>
-</mat-sidenav-container>
-
+    
+  <!-- Always present router-outlet for public routes like login and job portal -->
+  <router-outlet *ngIf="!(currentUser$ | async)"></router-outlet>
+</div> 

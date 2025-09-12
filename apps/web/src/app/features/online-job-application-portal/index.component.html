@@ -1,0 +1,337 @@
+<app-header *ngIf="publicMode" [publicMode]="publicMode" class="job-portal-header" [class.header-hidden]="!isHeaderVisible"></app-header>
+<div *ngIf="publicMode" style="height: 0px;"></div>
+<div class="job-portal-title-area-with-img">
+  <div class="job-portal-title-content">
+    <div class="welcome-badge">Welcome to the Job Portal</div>
+    <h1 class="job-portal-title">
+      Discover Your <span class="highlight-green">Dream Career</span><br />
+      Unlock Professional Opportunities
+    </h1>
+    <div class="job-portal-desc">
+      Browse hundreds of job opportunities, filter by your preferences, and apply easily online. Start your career journey today!
+    </div>
+  </div>
+  <div class="hero-illustration">
+    <img src="assets/images/job-hero-illustration.jpg" alt="People searching and announcing job opportunities illustration" />
+  </div>
+</div>
+
+<div class="jobstreet-portal-bg">
+  <!-- Modern Search Bar Section -->
+  <section class="search-section modern-search" aria-label="Job Search Filters">
+    <form class="search-form" (submit)="searchJobs()" autocomplete="off" role="search">
+      <div class="search-fields">
+        <div class="search-group">
+          <label for="search-keywords"><span class="material-symbols-outlined icon-blue">search</span> What</label>
+          <input id="search-keywords" type="text" [(ngModel)]="searchKeywords" name="keywords" placeholder="Job title, keywords, or company" aria-label="Search keywords" />
+        </div>
+        <div class="search-group">
+          <label for="search-department"><span class="material-symbols-outlined icon-yellow">category</span> Classification</label>
+          <select id="search-department" [(ngModel)]="selectedDepartment" name="department" aria-label="Classification">
+            <option value="">All</option>
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+        <div class="search-group">
+          <label for="search-salary"><span class="material-symbols-outlined icon-green">attach_money</span> Salary Range</label>
+          <select id="search-salary" [(ngModel)]="selectedSalaryRange" name="salaryRange" aria-label="Salary Range">
+            <option *ngFor="let range of salaryRanges" [value]="range.value || range.range">{{ range.label || range.range }}</option>
+          </select>
+        </div>
+        <button class="seek-btn modern-seek-btn" type="submit" aria-label="Search jobs">
+          <span class="material-symbols-outlined seek-icon">search</span>SEEK
+        </button>
+      </div>
+      <div class="filter-chips" *ngIf="activeFilters.length > 0">
+        <span *ngFor="let chip of activeFilters" class="chip">
+          {{ chip.label }}
+          <button type="button" class="chip-remove" (click)="removeFilter(chip.key)" aria-label="Remove filter">&times;</button>
+        </span>
+        <button type="button" class="clear-filters-btn" (click)="clearFilters()" aria-label="Clear all filters">
+          <span class="material-symbols-outlined icon-gray">close</span> Clear All
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Main Content: Job List & Details -->
+  <section class="main-content">
+    <div class="job-list-panel">
+      <div class="job-list-tabs">
+        <button class="tab" [class.active]="!showFavourites" (click)="showFavourites = false">All jobs</button>
+        <button class="tab" [class.active]="showFavourites" (click)="showFavourites = true">Favourites</button>
+      </div>
+      <div *ngIf="loading" class="loading-spinner">Loading jobs...</div>
+      <div *ngIf="error" class="error-message">{{ error }}</div>
+      <div class="job-count" *ngIf="!loading && !error && displayedJobs.length > 0">{{ displayedJobs.length }} jobs found</div>
+      <div class="job-cards" *ngIf="!loading && !error">
+        <div *ngIf="displayedJobs.length === 0" class="no-jobs-message">
+          <p>No jobs found matching the selected filters.</p>
+        </div>
+        <div class="job-card" *ngFor="let job of displayedJobs" (click)="selectJob(job)" [class.selected]="selectedJob?.id === job.id" tabindex="0" aria-label="View job details">
+          <div class="job-card-accent"></div>
+          <div class="job-card-content">
+            <div class="job-card-header-row">
+              <div class="job-logo job-logo-placeholder">
+                <span class="material-symbols-outlined icon-gray">business</span>
+              </div>
+              <div>
+                <div class="job-title">{{ job.position_title }}</div>
+                <div class="job-company">{{ job.department?.department_name }}</div>
+              </div>
+              <span class="bookmark material-symbols-outlined icon-pink" title="Save job" aria-label="Save job"
+                [class.favourited]="isFavourite(job)"
+                (click)="toggleFavourite(job); $event.stopPropagation();">
+                {{ isFavourite(job) ? 'bookmark_added' : 'bookmark' }}
+              </span>
+            </div>
+            <div class="job-card-badges">
+              <span class="badge badge-type">
+                <span class="material-symbols-outlined icon-green">work</span>
+                {{ job.employment_type }}
+              </span>
+              <span class="badge badge-salary">
+                <span class="material-symbols-outlined icon-green">attach_money</span>
+                {{ job.salary_range }}
+              </span>
+            </div>
+            <div class="job-summary">{{ job.job_description | slice:0:80 }}...</div>
+            <div class="job-meta">
+              <span class="material-symbols-outlined icon-yellow">calendar_month</span>
+              <span class="job-date">Deadline: {{ job.application_deadline | date }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="job-details-panel">
+      <ng-container *ngIf="selectedJob; else placeholder">
+        <div class="job-card job-details-card enhanced-details-card">
+          <div class="job-details-content">
+            <div class="job-details-title">{{ selectedJob.position_title }}</div>
+            <div class="job-details-company">
+              <span class="material-symbols-outlined icon-yellow">apartment</span>
+              {{ selectedJob.department?.department_name }}
+            </div>
+            <div class="job-details-badges">
+              <span class="badge badge-type">
+                <span class="material-symbols-outlined icon-green">work</span>
+                {{ selectedJob.employment_type }}
+              </span>
+              <span class="badge badge-salary">
+                <span class="material-symbols-outlined icon-green">attach_money</span>
+                {{ selectedJob.salary_range }}
+              </span>
+            </div>
+            <div class="job-details-divider"></div>
+            <div class="job-details-meta">
+              <span class="material-symbols-outlined icon-yellow">calendar_month</span>
+              <span>Deadline: {{ selectedJob.application_deadline | date }}</span>
+            </div>
+            <div class="job-details-divider"></div>
+            <div class="job-details-qualifications">
+              <span class="material-symbols-outlined icon-yellow">checklist</span>
+              <span><strong>Qualifications:</strong> {{ selectedJob.qualifications }}</span>
+            </div>
+            <div class="job-details-divider"></div>
+            <div class="job-details-description">
+              <span class="material-symbols-outlined icon-blue">description</span>
+              <div>
+                <strong>Description:</strong>
+                <div>{{ selectedJob.job_description }}</div>
+              </div>
+            </div>
+            <div class="job-details-divider"></div>
+          </div>
+          <div class="job-details-apply-area">
+            <button class="apply-btn enhanced-apply-btn" (click)="applyToJob(selectedJob)" aria-label="Apply to this job">
+              Apply Now
+            </button>
+            <button class="details-btn" (click)="openViewModal(selectedJob)" aria-label="View full job details">
+              Details
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Job Details Modal -->
+      <div class="job-modal-backdrop" *ngIf="showJobModal">
+        <div class="job-modal dynamic-modal" role="dialog" aria-modal="true" aria-labelledby="job-modal-title" aria-describedby="job-modal-desc" tabindex="-1">
+          <div class="modal-header-gradient" [ngClass]="getDepartmentThemeClass(modalJob?.department?.department_name)">
+            <div class="modal-logo-avatar">
+              <span class="material-symbols-outlined company-logo">business</span>
+            </div>
+            <div class="modal-title-group">
+              <div class="modal-job-title-main">{{ modalJob?.position_title }}</div>
+              <div class="modal-job-company">{{ modalJob?.department?.department_name }}</div>
+            </div>
+            <div class="modal-header-actions">
+              <button 
+                class="modal-action-btn" 
+                title="Save job" 
+                aria-label="Save job"
+                (click)="toggleFavourite(modalJob!)"
+                [class.favourited]="isFavourite(modalJob!)"
+              >
+                <span class="material-symbols-outlined">
+                  {{ isFavourite(modalJob!) ? 'bookmark_added' : 'bookmark' }}
+                </span>
+              </button>
+              <button 
+                class="modal-action-btn" 
+                title="Share job" 
+                aria-label="Share job"
+                (click)="shareJob(modalJob!)"
+              >
+                <span class="material-symbols-outlined">share</span>
+              </button>
+              <button 
+                #modalCloseBtn 
+                class="modal-close-btn" 
+                (click)="closeViewModal()" 
+                aria-label="Close job details"
+                title="Close"
+              >
+                <span class="material-symbols-outlined icon-gray">close</span>
+              </button>
+            </div>
+          </div>
+          <div class="job-modal-content">
+            <div id="job-modal-desc">
+              <!-- Key Information Grid -->
+              <div class="modal-info-grid">
+                <div class="info-item">
+                  <span class="info-icon material-symbols-outlined">apartment</span>
+                  <div class="info-content">
+                    <span class="info-label">Department</span>
+                    <span class="info-value">{{ modalJob?.department?.department_name }}</span>
+                  </div>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon material-symbols-outlined">work</span>
+                  <div class="info-content">
+                    <span class="info-label">Employment Type</span>
+                    <span class="info-value">{{ modalJob?.employment_type }}</span>
+                  </div>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon material-symbols-outlined">attach_money</span>
+                  <div class="info-content">
+                    <span class="info-label">Salary Range</span>
+                    <span class="info-value">{{ modalJob?.salary_range }}</span>
+                  </div>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon material-symbols-outlined">calendar_month</span>
+                  <div class="info-content">
+                    <span class="info-label">Application Deadline</span>
+                    <span class="info-value">{{ modalJob?.application_deadline | date }}</span>
+                  </div>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon material-symbols-outlined">group</span>
+                  <div class="info-content">
+                    <span class="info-label">Vacancies</span>
+                    <span class="info-value">{{ modalJob?.num_vacancies || 0 }} vacancy{{ (modalJob?.num_vacancies || 0) > 1 ? 'ies' : 'y' }}</span>
+                  </div>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon material-symbols-outlined">flag</span>
+                  <div class="info-content">
+                    <span class="info-label">Status</span>
+                    <span class="info-value status-badge" [ngClass]="modalJob?.posting_status?.toLowerCase()">{{ modalJob?.posting_status }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Job Description Section -->
+              <div class="modal-section-group">
+                <div class="section-header">
+                  <span class="material-symbols-outlined section-icon">description</span>
+                  <span class="section-title">Job Description</span>
+                </div>
+                <div class="section-content">{{ modalJob?.job_description }}</div>
+              </div>
+
+              <!-- Qualifications Section -->
+              <div class="modal-section-group" *ngIf="modalJob?.qualifications">
+                <div class="section-header">
+                  <span class="material-symbols-outlined section-icon">checklist</span>
+                  <span class="section-title">Qualifications</span>
+                </div>
+                <div class="section-content">{{ modalJob?.qualifications }}</div>
+              </div>
+
+              <!-- Technical Competencies Section -->
+              <div class="modal-section-group" *ngIf="modalJob?.technical_competencies">
+                <div class="section-header">
+                  <span class="material-symbols-outlined section-icon">list_alt</span>
+                  <span class="section-title">Technical Competencies</span>
+                </div>
+                <div class="section-content">{{ modalJob?.technical_competencies }}</div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="apply-btn dynamic-apply-btn" (click)="applyToJob(modalJob!)" aria-label="Apply to this job">
+                <span class="material-symbols-outlined">rocket_launch</span> Apply Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template #placeholder>
+        <div class="job-details-placeholder">
+          <div class="placeholder-img"></div>
+          <h3>Select a job</h3>
+          <p>Display details here</p>
+        </div>
+      </ng-template>
+    </div>
+  </section>
+</div>
+<!-- Login Prompt Modal for Public Mode -->
+<div class="login-prompt-overlay" *ngIf="showLoginPromptModal" (click)="closeLoginPromptModal()">
+  <div class="login-prompt-container" (click)="$event.stopPropagation()">
+    <div class="login-prompt-header">
+      <h3 class="login-prompt-title">Login Required</h3>
+      <p class="login-prompt-subtitle">Please log in to apply for this position</p>
+    </div>
+    
+    <div class="login-prompt-content">
+      <div class="job-summary" *ngIf="loginPromptJob">
+        <div class="job-summary-header">
+          <span class="material-symbols-outlined">work</span>
+          <span class="job-title">{{ loginPromptJob.position_title }}</span>
+        </div>
+        <div class="job-summary-details">
+          <span class="department">{{ loginPromptJob.department?.department_name }}</span>
+          <span class="employment-type">{{ loginPromptJob.employment_type }}</span>
+        </div>
+      </div>
+      
+      <div class="login-prompt-message">
+        <p>To apply for this position, you need to be logged in as a job applicant.</p>
+        <p>If you don't have an account, you can register for free.</p>
+      </div>
+    </div>
+    
+    <div class="login-prompt-actions">
+      <button class="btn btn-secondary" (click)="closeLoginPromptModal()">
+        <span class="material-symbols-outlined">close</span>
+        Cancel
+      </button>
+      <button class="btn btn-primary" (click)="navigateToLogin()">
+        <span class="material-symbols-outlined">login</span>
+        Continue to Login
+      </button>
+    </div>
+  </div>
+</div>
+
+<app-job-application-modal
+  *ngIf="showApplicationModal"
+  [job]="applicationJob"
+  [showModal]="showApplicationModal"
+  (close)="closeApplicationModal()"
+  (applicationSubmitted)="onApplicationSubmitted($event)"
+></app-job-application-modal> 

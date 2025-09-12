@@ -1,0 +1,32 @@
+<!-- Test message to verify component loading -->
+<div style="background: blue; color: white; padding: 20px; margin: 20px;">
+  DASHBOARD COMPONENT LOADED!
+</div>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>{{ title }}</h1>
+    <p>Welcome to the HRIS Dashboard</p>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of dashboardStats">
+      <div class="stat-icon">{{ stat.icon }}</div>
+      <div class="stat-content">
+        <h3>{{ stat.label }}</h3>
+        <p class="stat-value">{{ stat.value }}</p>
+        <p class="stat-change" [class]="'trend-' + stat.trend">{{ stat.change }}</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="action-grid">
+      <button class="action-btn" *ngFor="let action of quickActions">
+        <span class="action-icon">{{ action.icon }}</span>
+        <span>{{ action.name }}</span>
+      </button>
+    </div>
+  </div>
+</div>

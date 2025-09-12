@@ -1,0 +1,922 @@
+<div class="modal-overlay fixed inset-0 z-50 w-screen h-screen bg-black/50 backdrop-blur-sm overflow-y-auto"
+     [ngClass]="closing ? 'animate-slide-out-right' : 'animate-slide-in-right'"
+     (click)="noop($event)">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Professional Header -->
+    <div class="modal-header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="header-icon">
+            <span class="material-symbols-outlined">person_add</span>
+          </div>
+          <div class="header-text">
+            <h1 class="modal-title">{{ mode === 'create' ? 'Create New' : 'Edit' }} Employee 201 File</h1>
+            <p class="modal-subtitle">Complete the employee's personal and employment information</p>
+          </div>
+        </div>
+        <button type="button" class="close-button" (click)="onCancel()" aria-label="Close modal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <form (ngSubmit)="onSave()" #modalForm="ngForm" autocomplete="off" class="modal-form">
+      <!-- Validation Alert -->
+      <div *ngIf="showValidationMessage" class="validation-alert">
+        <div class="alert-content">
+          <span class="alert-icon">⚠️</span>
+          <span class="alert-text">Please complete all required fields marked with an asterisk (*)</span>
+        </div>
+        <button type="button" class="alert-close" (click)="hideValidationMessage()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="form-content">
+        <!-- Profile Picture Section -->
+        <section class="form-section profile-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-outlined">photo_camera</span>
+            </div>
+            <div class="section-title-group">
+              <h2 class="section-title">Profile Picture</h2>
+              <p class="section-description">Upload a professional photo for the employee</p>
+            </div>
+          </div>
+          
+          <div class="profile-upload-area">
+            <div class="profile-preview">
+          <img
+            *ngIf="data.profilePictureUrl; else defaultAvatar"
+            [src]="data.profilePictureUrl"
+            alt="Profile Picture"
+                class="profile-image"
+          />
+          <ng-template #defaultAvatar>
+                <div class="default-avatar">
+                  <span class="material-symbols-outlined">person</span>
+            </div>
+          </ng-template>
+          <button
+            *ngIf="data.profilePictureUrl"
+            type="button"
+                class="remove-photo-btn"
+            (click)="removeProfilePicture()"
+            aria-label="Remove profile picture"
+          >
+                <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+            <div class="upload-controls">
+              <label class="upload-button">
+          <input
+            type="file"
+            accept="image/*"
+            class="hidden"
+            (change)="onProfilePictureChange($event)"
+          />
+                <span class="material-symbols-outlined">upload</span>
+                <span>Upload Photo</span>
+        </label>
+              <p class="upload-hint">JPG, PNG, GIF up to 2MB</p>
+            </div>
+          </div>
+      </section>
+
+        <!-- Account Credentials Section -->
+        <section class="form-section" *ngIf="mode === 'create'">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-outlined">lock</span>
+            </div>
+            <div class="section-title-group">
+          <h2 class="section-title">Account Credentials</h2>
+              <p class="section-description">Username will be generated from email address</p>
+            </div>
+        </div>
+        
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label">
+                Generated Username
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">person</span>
+                </span>
+                <input 
+                  type="text" 
+                  [value]="generateUsernameFromEmail()" 
+                  class="form-input" 
+                  placeholder="Username will be generated from email"
+                  readonly
+                  disabled
+                />
+              </div>
+              <span class="help-text">Username will be automatically generated from the email address</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Personal Information Section -->
+        <section class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-outlined">person</span>
+            </div>
+            <div class="section-title-group">
+              <h2 class="section-title">Personal Information</h2>
+              <p class="section-description">Basic personal details of the employee</p>
+        </div>
+      </div>
+          
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label">
+                First Name <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">badge</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.firstName" 
+                  name="firstName" 
+                  required 
+                  class="form-input" 
+                  placeholder="Enter first name"
+                  [ngClass]="{'error': formSubmitted && !data.firstName}" 
+                />
+        </div>
+              <span *ngIf="formSubmitted && !data.firstName" class="error-message">First name is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Middle Name</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">badge</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.middleName" 
+                  name="middleName" 
+                  class="form-input" 
+                  placeholder="Enter middle name" 
+                />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Last Name <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">badge</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.lastName" 
+                  name="lastName" 
+                  required 
+                  class="form-input" 
+                  placeholder="Enter last name"
+                  [ngClass]="{'error': formSubmitted && !data.lastName}" 
+                />
+              </div>
+              <span *ngIf="formSubmitted && !data.lastName" class="error-message">Last name is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Suffix</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">badge</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.suffix" 
+                  name="suffix" 
+                  class="form-input" 
+                  placeholder="Jr, Sr, III" 
+                />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Birthdate <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">calendar_today</span>
+                </span>
+                <input 
+                  type="date" 
+                  [(ngModel)]="data.birthdate" 
+                  name="birthdate" 
+                  required 
+                  class="form-input"
+                  [ngClass]="{'error': formSubmitted && !data.birthdate}" 
+                />
+              </div>
+              <span *ngIf="formSubmitted && !data.birthdate" class="error-message">Birthdate is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Gender <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">wc</span>
+                </span>
+                <select 
+                  [(ngModel)]="data.gender" 
+                  name="gender" 
+                  required 
+                  class="form-input"
+                  [ngClass]="{'error': formSubmitted && !data.gender}"
+                >
+                  <option value="" disabled selected>Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+              </div>
+              <span *ngIf="formSubmitted && !data.gender" class="error-message">Gender is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Civil Status <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">favorite</span>
+                </span>
+                <select 
+                  [(ngModel)]="data.civilStatus" 
+                  name="civilStatus" 
+                  required 
+                  class="form-input"
+                  [ngClass]="{'error': formSubmitted && !data.civilStatus}"
+                >
+                  <option value="" disabled selected>Select civil status</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Widowed">Widowed</option>
+                <option value="Separated">Separated</option>
+                <option value="Divorced">Divorced</option>
+              </select>
+              </div>
+              <span *ngIf="formSubmitted && !data.civilStatus" class="error-message">Civil status is required</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact Information Section -->
+        <section class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-outlined">contact_phone</span>
+            </div>
+            <div class="section-title-group">
+              <h2 class="section-title">Contact Information</h2>
+              <p class="section-description">How to reach the employee</p>
+        </div>
+      </div>
+          
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label">
+                Email Address <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">email</span>
+                </span>
+                <input 
+                  type="email" 
+                  [(ngModel)]="data.email" 
+                  name="email" 
+                  required 
+                  class="form-input" 
+                  placeholder="Enter email address"
+                  [ngClass]="{'error': formSubmitted && !data.email}" 
+                />
+        </div>
+              <span *ngIf="formSubmitted && !data.email" class="error-message">Email address is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Phone Number <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">phone</span>
+                </span>
+              <input
+                type="tel"
+                [(ngModel)]="data.number"
+                name="number"
+                required
+                  class="form-input"
+                placeholder="Enter phone number"
+                  [ngClass]="{'error': formSubmitted && !data.number}"
+              />
+              </div>
+              <span *ngIf="formSubmitted && !data.number" class="error-message">Phone number is required</span>
+            </div>
+
+            <div class="form-field full-width">
+              <label class="field-label">
+                Address <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">location_on</span>
+                </span>
+                <textarea 
+                  [(ngModel)]="data.address" 
+                  name="address" 
+                  required 
+                  rows="3" 
+                  class="form-input" 
+                  placeholder="Enter complete address"
+                  [ngClass]="{'error': formSubmitted && !data.address}"
+                ></textarea>
+              </div>
+              <span *ngIf="formSubmitted && !data.address" class="error-message">Address is required</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Employment Details Section -->
+        <section class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-outlined">work</span>
+            </div>
+            <div class="section-title-group">
+              <h2 class="section-title">Employment Details</h2>
+              <p class="section-description">Work-related information and position details</p>
+        </div>
+      </div>
+          
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label">
+                Employment Type <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">business_center</span>
+                </span>
+                <select 
+                  [(ngModel)]="data.employmentType" 
+                  name="employmentType" 
+                  required 
+                  class="form-input"
+                  [ngClass]="{'error': formSubmitted && !data.employmentType}"
+                >
+                  <option value="" disabled selected>Select employment type</option>
+                <option value="Full_Time">Full Time</option>
+                <option value="Part_time">Part Time</option>
+                <option value="Consultant">Consultant</option>
+                <option value="Intern">Intern</option>
+                <option value="Contractual">Contractual</option>
+                <option value="Probationary">Probationary</option>
+                <option value="OJT">OJT</option>
+              </select>
+              </div>
+              <span *ngIf="formSubmitted && !data.employmentType" class="error-message">Employment type is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Position <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">work</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.designation" 
+                  name="designation" 
+                  required 
+                  class="form-input" 
+                  placeholder="Enter position/job title"
+                  [ngClass]="{'error': formSubmitted && !data.designation}" 
+                />
+              </div>
+              <span *ngIf="formSubmitted && !data.designation" class="error-message">Position is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Department <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">apartment</span>
+                </span>
+                <select 
+                  [(ngModel)]="data.department" 
+                  name="department" 
+                  required 
+                  class="form-input"
+                  [ngClass]="{'error': formSubmitted && !data.department}" 
+                  [disabled]="loading"
+                >
+                <option value="" disabled selected>
+                    {{ loading ? 'Loading departments...' : 'Select department' }}
+                </option>
+                <option *ngFor="let dept of departments" [value]="dept.department_name">
+                  {{ dept.department_name }}
+                </option>
+              </select>
+              </div>
+              <span *ngIf="formSubmitted && !data.department" class="error-message">Department is required</span>
+              <span *ngIf="!loading && departments.length === 0" class="warning-message">No departments available. Please contact administrator.</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Designation <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">badge</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.position" 
+                  name="position" 
+                  required 
+                  class="form-input" 
+                  placeholder="Enter designation"
+                  [ngClass]="{'error': formSubmitted && !data.position}" 
+                />
+              </div>
+              <span *ngIf="formSubmitted && !data.position" class="error-message">Designation is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Appointment Date <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">event</span>
+                </span>
+                <input 
+                  type="date" 
+                  [(ngModel)]="data.appointmentDate" 
+                  name="appointmentDate" 
+                  required 
+                  class="form-input"
+                  [ngClass]="{'error': formSubmitted && !data.appointmentDate}" 
+                />
+              </div>
+              <span *ngIf="formSubmitted && !data.appointmentDate" class="error-message">Appointment date is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Start Date <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">event_available</span>
+                </span>
+                <input 
+                  type="date" 
+                  [(ngModel)]="data.startDate" 
+                  name="startDate" 
+                  required 
+                  class="form-input"
+                  [ngClass]="{'error': formSubmitted && !data.startDate}" 
+                />
+              </div>
+              <span *ngIf="formSubmitted && !data.startDate" class="error-message">Start date is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Employment Status <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">verified_user</span>
+                </span>
+                <select 
+                  [(ngModel)]="data.employmentStatus" 
+                  name="employmentStatus" 
+                  required 
+                  class="form-input"
+                  [ngClass]="{'error': formSubmitted && !data.employmentStatus}"
+                >
+                  <option value="" disabled selected>Select employment status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="On Leave">On Leave</option>
+                <option value="Terminated">Terminated</option>
+              </select>
+              </div>
+              <span *ngIf="formSubmitted && !data.employmentStatus" class="error-message">Employment status is required</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Job Level</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">trending_up</span>
+                </span>
+              <input
+                type="number"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                [(ngModel)]="data.jobLevel"
+                name="jobLevel"
+                  class="form-input no-spinner"
+                  placeholder="Enter job level"
+              />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Job Grade</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">grade</span>
+                </span>
+              <input
+                type="number"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                [(ngModel)]="data.jobGrade"
+                name="jobGrade"
+                  class="form-input no-spinner"
+                  placeholder="Enter job grade"
+              />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Government IDs Section -->
+        <section class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-outlined">verified</span>
+            </div>
+            <div class="section-title-group">
+              <h2 class="section-title">Government IDs</h2>
+              <p class="section-description">Optional government identification numbers</p>
+        </div>
+      </div>
+          
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label">GSIS Number</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">credit_card</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.gsis" 
+                  name="gsis" 
+                  class="form-input" 
+                  placeholder="Enter GSIS number" 
+                />
+        </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Pag-IBIG Number</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">credit_card</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.pagibig" 
+                  name="pagibig" 
+                  class="form-input" 
+                  placeholder="Enter Pag-IBIG number" 
+                />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">PhilHealth Number</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">credit_card</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.philhealth" 
+                  name="philhealth" 
+                  class="form-input" 
+                  placeholder="Enter PhilHealth number" 
+                />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">SSS Number</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">credit_card</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.sss" 
+                  name="sss" 
+                  class="form-input" 
+                  placeholder="Enter SSS number" 
+                />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">TIN Number</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">credit_card</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.tin_number" 
+                  name="tin_number" 
+                  class="form-input" 
+                  placeholder="Enter TIN number" 
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Dependents & Emergency Contact Section -->
+        <section class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-outlined">family_restroom</span>
+            </div>
+            <div class="section-title-group">
+              <h2 class="section-title">Dependents & Emergency Contact</h2>
+              <p class="section-description">Family information and emergency contact details</p>
+        </div>
+      </div>
+          
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label class="field-label">Dependents</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">people</span>
+                </span>
+                <textarea 
+                  [(ngModel)]="data.dependents" 
+                  name="dependents" 
+                  rows="3" 
+                  class="form-input" 
+                  placeholder="List dependents (name, relationship, age)"
+                ></textarea>
+        </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Emergency Contact Name</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">person</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.emergencyContactName" 
+                  name="emergencyContactName" 
+                  class="form-input" 
+                  placeholder="Enter contact name" 
+                />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Emergency Contact Number</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">phone</span>
+                </span>
+              <input
+                type="tel"
+                [(ngModel)]="data.emergencyContactNumber"
+                name="emergencyContactNumber"
+                  class="form-input"
+                  placeholder="Enter contact number"
+              />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Emergency Contact Relationship</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">favorite</span>
+                </span>
+                <input 
+                  type="text" 
+                  [(ngModel)]="data.emergencyContactRelationship" 
+                  name="emergencyContactRelationship" 
+                  class="form-input" 
+                  placeholder="Enter relationship" 
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Password Section -->
+        <section class="form-section" *ngIf="mode === 'create'">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-outlined">lock</span>
+            </div>
+            <div class="section-title-group">
+              <h2 class="section-title">Login Password</h2>
+              <p class="section-description">Set up the employee's login password</p>
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label">
+                Password <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">lock</span>
+                </span>
+                <input 
+                  type="password" 
+                  [(ngModel)]="data.password" 
+                  name="password" 
+                  required 
+                  class="form-input" 
+                  placeholder="Enter password"
+                  [ngClass]="{'error': formSubmitted && !data.password}" 
+                />
+              </div>
+              <span *ngIf="formSubmitted && !data.password" class="error-message">Password is required</span>
+              <div *ngIf="data.password" class="password-strength">
+                <div class="strength-bar">
+                  <div class="strength-fill" [ngClass]="getPasswordStrengthClass()"></div>
+                </div>
+                <span class="strength-text">{{ getPasswordStrengthText() }}</span>
+              </div>
+              <div *ngIf="data.password" class="password-requirements">
+                <small class="requirement" [ngClass]="{'met': data.password.length >= 8}">
+                  ✓ At least 8 characters
+                </small>
+                <small class="requirement" [ngClass]="{'met': hasUppercase()}">
+                  ✓ One uppercase letter
+                </small>
+                <small class="requirement" [ngClass]="{'met': hasLowercase()}">
+                  ✓ One lowercase letter
+                </small>
+                <small class="requirement" [ngClass]="{'met': hasNumber()}">
+                  ✓ One number
+                </small>
+                <small class="requirement" [ngClass]="{'met': hasSpecialChar()}">
+                  ✓ One special character
+                </small>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Confirm Password <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">lock_reset</span>
+                </span>
+                <input 
+                  type="password" 
+                  [(ngModel)]="data.confirmPassword" 
+                  name="confirmPassword" 
+                  required 
+                  class="form-input" 
+                  placeholder="Confirm password"
+                  [ngClass]="{'error': formSubmitted && (!data.confirmPassword || data.password !== data.confirmPassword)}" 
+                />
+              </div>
+              <span *ngIf="formSubmitted && !data.confirmPassword" class="error-message">Confirm password is required</span>
+              <span *ngIf="formSubmitted && data.password && data.confirmPassword && data.password !== data.confirmPassword" class="error-message">Passwords do not match</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Documents Upload Section -->
+        <section class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-outlined">folder</span>
+            </div>
+            <div class="section-title-group">
+              <h2 class="section-title">Documents</h2>
+              <p class="section-description">Upload relevant documents and certificates</p>
+        </div>
+      </div>
+          
+          <div class="form-field full-width">
+            <div class="file-upload-container"
+              (click)="fileInput.click()"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onFileDrop($event)"
+                 [class.drag-over]="isDragOver">
+              <div class="upload-content">
+                <span class="upload-icon">
+                  <span class="material-symbols-outlined">cloud_upload</span>
+                </span>
+                <div class="upload-text">
+                  <h3>Upload Documents</h3>
+                  <p>Click to browse or drag and drop files here</p>
+                </div>
+              </div>
+              <input
+                #fileInput
+                type="file"
+                class="hidden-file-input"
+                (change)="onFileChange($event)"
+                multiple
+              />
+            </div>
+      
+            <!-- File Preview List -->
+            <div *ngIf="selectedFiles.length > 0" class="file-preview-list">
+              <div *ngFor="let file of selectedFiles; let i = index" class="file-preview-item">
+                <div class="file-info">
+                  <span class="file-icon">
+                    <span class="material-symbols-outlined">description</span>
+                  </span>
+                <span class="file-name">{{ file.name }}</span>
+                </div>
+                <div class="file-meta">
+                  <input 
+                    type="text" 
+                    [(ngModel)]="fileMetas[i].title" 
+                    placeholder="Document title" 
+                    class="meta-input" 
+                  />
+                  <input 
+                    type="text" 
+                    [(ngModel)]="fileMetas[i].description" 
+                    placeholder="Description" 
+                    class="meta-input" 
+                  />
+                </div>
+                <button 
+                  type="button" 
+                  class="remove-file-btn" 
+                  (click)="removeFile(i)"
+                  aria-label="Remove file"
+                >
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Professional Footer -->
+      <div class="modal-footer">
+        <div class="footer-content">
+          <div class="footer-info">
+            <p class="footer-text">All fields marked with <span class="required">*</span> are required</p>
+        </div>
+          <div class="footer-actions">
+            <button type="button" class="btn btn-secondary" (click)="onCancel()">
+              <span class="material-symbols-outlined">close</span>
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <span class="material-symbols-outlined">save</span>
+              {{ mode === 'create' ? 'Create Employee' : 'Save Changes' }}
+            </button>
+      </div>   
+    </div>   
+      </div>
+    </form>
+  </div>
+</div>

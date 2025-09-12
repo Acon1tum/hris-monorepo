@@ -17,12 +17,12 @@
     "emitDecoratorMetadata": true,
     "baseUrl": ".",
     "paths": {
-      "@hris/types": ["./packages/types/src"],
-      "@hris/utils": ["./packages/utils/src"],
-      "@hris/db": ["./packages/db/src/client.ts"],
-      "@hris/types/*": ["./packages/types/src/*"],
-      "@hris/utils/*": ["./packages/utils/src/*"],
-      "@hris/db/*": ["./packages/db/src/*"]
+      "@hris/types": ["./packages/types/dist/index"],
+      "@hris/utils": ["./packages/utils/dist/index"],
+      "@hris/db": ["./packages/db/dist/client"],
+      "@hris/types/*": ["./packages/types/dist/*"],
+      "@hris/utils/*": ["./packages/utils/dist/*"],
+      "@hris/db/*": ["./packages/db/dist/*"]
     }
   },
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]

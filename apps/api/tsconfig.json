@@ -5,12 +5,12 @@
     "rootDir": "./src",
     "baseUrl": "./",
     "paths": {
-      "@hris/types": ["../../packages/types/src"],
-      "@hris/types/*": ["../../packages/types/src/*"],
-      "@hris/utils": ["../../packages/utils/src"],
-      "@hris/utils/*": ["../../packages/utils/src/*"],
-      "@hris/db": ["../../packages/db/src/client.ts"],
-      "@hris/db/*": ["../../packages/db/src/*"]
+      "@hris/types": ["../../packages/types/dist/index"],
+      "@hris/types/*": ["../../packages/types/dist/*"],
+      "@hris/utils": ["../../packages/utils/dist/index"],
+      "@hris/utils/*": ["../../packages/utils/dist/*"],
+      "@hris/db": ["../../packages/db/dist/client"],
+      "@hris/db/*": ["../../packages/db/dist/*"]
     }
   },
   "include": [
