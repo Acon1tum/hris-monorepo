@@ -21,7 +21,12 @@
     "db:push": "turbo run db:push --filter=db",
     "db:migrate": "turbo run db:migrate --filter=db",
     "db:seed": "turbo run db:seed --filter=db",
-    "db:studio": "turbo run db:studio --filter=db"
+    "db:studio": "turbo run db:studio --filter=db",
+    "lms:generate": "turbo run db:generate --filter=lms-db",
+    "lms:push": "turbo run db:push --filter=lms-db",
+    "lms:migrate": "turbo run db:migrate --filter=lms-db",
+    "lms:seed": "turbo run db:seed --filter=lms-db",
+    "lms:studio": "turbo run db:studio --filter=lms-db"
   },
   "devDependencies": {
     "@turbo/gen": "^1.10.12",
