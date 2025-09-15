@@ -32,7 +32,7 @@ export type ApplicationStatus =
   | 'rejected' 
   | 'accepted';
 
-export type EmploymentType = 'Full_Time' | 'Part_Time' | 'Contractual' | 'Internship';
+export type EmploymentType = 'Plantilla' | 'Contractual' | 'Casual' | 'Contract_Of_Service';
 
 export interface DashboardStats {
   totalApplications: number;
@@ -108,7 +108,7 @@ export class ApplicantDashboardComponent implements OnInit, OnDestroy {
       lastUpdated: new Date('2024-01-20'),
       applicationDeadline: new Date('2024-02-15'),
       salaryRange: '₱45,000 - ₱65,000',
-      employmentType: 'Full_Time',
+      employmentType: 'Plantilla',
       location: 'Makati City, Metro Manila',
       description: 'Develop and maintain web applications using modern technologies',
       requirements: ['Angular', 'TypeScript', 'Node.js', '5+ years experience']
@@ -123,7 +123,7 @@ export class ApplicantDashboardComponent implements OnInit, OnDestroy {
       lastUpdated: new Date('2024-01-18'),
       applicationDeadline: new Date('2024-02-10'),
       salaryRange: '₱25,000 - ₱35,000',
-      employmentType: 'Full_Time',
+      employmentType: 'Plantilla',
       location: 'Quezon City, Metro Manila',
       description: 'Manage recruitment processes and employee relations',
       requirements: ['HR Management', 'Recruitment', 'Employee Relations', '3+ years experience']
@@ -153,7 +153,7 @@ export class ApplicantDashboardComponent implements OnInit, OnDestroy {
       lastUpdated: new Date('2024-01-10'),
       applicationDeadline: new Date('2024-01-20'),
       salaryRange: '₱35,000 - ₱45,000',
-      employmentType: 'Full_Time',
+      employmentType: 'Plantilla',
       location: 'Manila City, Metro Manila',
       description: 'Manage financial records and prepare reports',
       requirements: ['CPA License', 'Financial Reporting', 'Tax Compliance', '5+ years experience']
@@ -168,7 +168,7 @@ export class ApplicantDashboardComponent implements OnInit, OnDestroy {
       lastUpdated: new Date('2024-01-22'),
       applicationDeadline: new Date('2024-02-12'),
       salaryRange: '₱30,000 - ₱45,000',
-      employmentType: 'Full_Time',
+      employmentType: 'Plantilla',
       location: 'Makati City, Metro Manila',
       description: 'Create user-centered design solutions',
       requirements: ['Figma', 'Adobe Creative Suite', 'User Research', '3+ years experience'],
@@ -184,7 +184,7 @@ export class ApplicantDashboardComponent implements OnInit, OnDestroy {
       lastUpdated: new Date('2024-01-25'),
       applicationDeadline: new Date('2024-02-08'),
       salaryRange: '₱28,000 - ₱40,000',
-      employmentType: 'Full_Time',
+      employmentType: 'Plantilla',
       location: 'BGC, Taguig City',
       description: 'Analyze data and create insights for business decisions',
       requirements: ['SQL', 'Python', 'Data Visualization', '2+ years experience']
@@ -485,10 +485,10 @@ export class ApplicantDashboardComponent implements OnInit, OnDestroy {
 
   getEmploymentTypeLabel(type: EmploymentType): string {
     const labels: Record<EmploymentType, string> = {
-      Full_Time: 'Full Time',
-      Part_Time: 'Part Time',
+      Plantilla: 'Plantilla (Regular)',
       Contractual: 'Contractual',
-      Internship: 'Internship'
+      Casual: 'Casual',
+      Contract_Of_Service: 'Contract of Service'
     };
     return labels[type] || type;
   }

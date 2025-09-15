@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '@hris/db';
+import bcrypt from 'bcryptjs';
 
 export class PersonnelController {
   static async getAllPersonnel(req: Request, res: Response) {
@@ -53,9 +54,61 @@ export class PersonnelController {
   }
 
   static async createPersonnel(req: Request, res: Response) {
-    const data = req.body;
-    const created = await prisma.personnel.create({ data });
-    res.status(201).json({ success: true, data: created });
+    try {
+      const data = req.body;
+      console.log('🔍 Received personnel creation request:', JSON.stringify(data, null, 2));
+      
+      // Extract user data from the request
+      const { username, email, password, ...personnelData } = data;
+      console.log('🔍 Extracted personnel data:', JSON.stringify(personnelData, null, 2));
+      
+      // First create the user if user data is provided
+      let userId: string | undefined = undefined;
+      if (username && email && password) {
+        console.log('🔍 Creating user with data:', { username, email, role: 'Employee' });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        const user = await prisma.user.create({
+          data: {
+            username,
+            email,
+            password_hash: hashedPassword,
+            role: 'Employee', // Default role for new personnel
+            status: 'Active',
+            profile_picture: data.profile_picture || null
+          }
+        });
+        userId = user.id;
+        console.log('✅ User created successfully with ID:', userId);
+      } else {
+        console.log('⚠️ No user data provided, creating personnel without user account');
+      }
+      
+      // Create personnel record with user_id if user was created
+      const personnelRecord = {
+        ...personnelData,
+        user_id: userId,
+        // Convert date strings to Date objects if they exist
+        date_of_birth: personnelData.date_of_birth ? new Date(personnelData.date_of_birth) : undefined,
+        date_hired: personnelData.date_hired ? new Date(personnelData.date_hired) : undefined
+      };
+      
+      console.log('🔍 Creating personnel record with data:', JSON.stringify(personnelRecord, null, 2));
+      
+      const created = await prisma.personnel.create({ 
+        data: personnelRecord,
+        include: { department: true, user: true }
+      });
+      
+      console.log('✅ Personnel created successfully:', created.id);
+      res.status(201).json({ success: true, data: created });
+    } catch (error) {
+      console.error('Error creating personnel:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: { message: 'Failed to create personnel record' } 
+      });
+    }
   }
 
   static async updatePersonnel(req: Request, res: Response) {

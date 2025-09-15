@@ -46,6 +46,7 @@ router.use('/auth', authRoutes);
 router.use('/employees', employeeRoutes);
 router.use('/personnel', personnelRoutes);
 router.use('/leaves', leaveRoutes);
+router.use('/leave', leaveRoutes); // Alias for frontend compatibility
 router.use('/timekeeping', timekeepingRoutes);
 router.use('/payroll', payrollRoutes);
 router.use('/performance', performanceRoutes);
@@ -55,5 +56,6 @@ router.use('/job-applications', jobApplicationRoutes);
 router.use('/health', healthRoutes);
 router.use('/reports', reportRoutes);
 router.use('/admin', adminRoutes);
+router.use('/system', adminRoutes); // Alias for frontend compatibility
 
 export default router;

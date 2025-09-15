@@ -418,6 +418,13 @@
   animation: fadeInBackdrop 0.25s;
 }
 
+// Darken sidebar when modal is open
+body.modal-open .sidebar {
+  z-index: 999 !important;
+  filter: brightness(0.7);
+  transition: filter 0.3s ease;
+}
+
 @keyframes fadeInBackdrop {
   from { opacity: 0; }
   to { opacity: 1; }

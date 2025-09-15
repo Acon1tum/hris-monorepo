@@ -74,6 +74,8 @@ export class LeaveTypeManagementComponent implements OnInit, OnDestroy {
     if (this.toastTimeout) {
       clearTimeout(this.toastTimeout);
     }
+    // Clean up modal-open class from body
+    document.body.classList.remove('modal-open');
   }
 
   /**
@@ -119,6 +121,8 @@ export class LeaveTypeManagementComponent implements OnInit, OnDestroy {
     };
     this.addValidation = {};
     this.showAddModal = true;
+    // Add modal-open class to body to darken sidebar
+    document.body.classList.add('modal-open');
   }
 
   /**
@@ -135,6 +139,8 @@ export class LeaveTypeManagementComponent implements OnInit, OnDestroy {
     };
     this.editValidation = {};
     this.showEditModal = true;
+    // Add modal-open class to body to darken sidebar
+    document.body.classList.add('modal-open');
   }
 
   /**
@@ -143,6 +149,8 @@ export class LeaveTypeManagementComponent implements OnInit, OnDestroy {
   onDeleteLeaveType(leaveType: LeaveType) {
     this.leaveTypeToDelete = leaveType;
     this.showDeleteModal = true;
+    // Add modal-open class to body to darken sidebar
+    document.body.classList.add('modal-open');
   }
 
   /**
@@ -193,6 +201,8 @@ export class LeaveTypeManagementComponent implements OnInit, OnDestroy {
           this.loadLeaveTypes();
           this.showAddModal = false;
           this.isSubmitting = false;
+          // Remove modal-open class from body
+          document.body.classList.remove('modal-open');
           this.showToast('Leave type created successfully!', 'success');
         },
         error: (error) => {
@@ -251,6 +261,8 @@ export class LeaveTypeManagementComponent implements OnInit, OnDestroy {
           this.loadLeaveTypes();
           this.showEditModal = false;
           this.isSubmitting = false;
+          // Remove modal-open class from body
+          document.body.classList.remove('modal-open');
           this.showToast('Leave type updated successfully!', 'success');
         },
         error: (error) => {
@@ -277,6 +289,8 @@ export class LeaveTypeManagementComponent implements OnInit, OnDestroy {
           this.showDeleteModal = false;
           this.leaveTypeToDelete = null;
           this.isSubmitting = false;
+          // Remove modal-open class from body
+          document.body.classList.remove('modal-open');
           this.showToast('Leave type deleted successfully!', 'success');
         },
         error: (error) => {
@@ -292,6 +306,8 @@ export class LeaveTypeManagementComponent implements OnInit, OnDestroy {
   cancelDeleteLeaveType() {
     this.showDeleteModal = false;
     this.leaveTypeToDelete = null;
+    // Remove modal-open class from body
+    document.body.classList.remove('modal-open');
   }
 
   /**

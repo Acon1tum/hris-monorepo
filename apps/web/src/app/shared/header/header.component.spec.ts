@@ -24,7 +24,7 @@ describe('HeaderComponent', () => {
 
   it('should display the correct title', () => {
     const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.app-title').textContent).toContain('HRIS Frontend');
+    expect(compiled.querySelector('.app-title').textContent).toContain('Quanby HRIS');
   });
 
   it('should have user menu items', () => {

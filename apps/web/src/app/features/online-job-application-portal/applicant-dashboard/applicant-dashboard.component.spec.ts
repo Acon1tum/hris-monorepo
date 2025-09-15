@@ -60,8 +60,8 @@ describe('ApplicantDashboardComponent', () => {
 
   it('should calculate stats correctly', () => {
     component.applications = [
-      { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' },
-      { id: '2', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'accepted', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' }
+      { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' },
+      { id: '2', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'accepted', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' }
     ];
 
     component.calculateStats();
@@ -74,8 +74,8 @@ describe('ApplicantDashboardComponent', () => {
 
   it('should filter applications correctly', () => {
     component.applications = [
-      { id: '1', jobTitle: 'Software Engineer', company: 'Test', department: 'IT', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' },
-      { id: '2', jobTitle: 'HR Manager', company: 'Test', department: 'HR', applicationDate: new Date(), status: 'accepted', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' }
+      { id: '1', jobTitle: 'Software Engineer', company: 'Test', department: 'IT', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' },
+      { id: '2', jobTitle: 'HR Manager', company: 'Test', department: 'HR', applicationDate: new Date(), status: 'accepted', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' }
     ];
 
     component.selectedFilter = 'pending';
@@ -86,8 +86,8 @@ describe('ApplicantDashboardComponent', () => {
 
   it('should search applications correctly', () => {
     component.applications = [
-      { id: '1', jobTitle: 'Software Engineer', company: 'Test', department: 'IT', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' },
-      { id: '2', jobTitle: 'HR Manager', company: 'Test', department: 'HR', applicationDate: new Date(), status: 'accepted', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' }
+      { id: '1', jobTitle: 'Software Engineer', company: 'Test', department: 'IT', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' },
+      { id: '2', jobTitle: 'HR Manager', company: 'Test', department: 'HR', applicationDate: new Date(), status: 'accepted', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' }
     ];
 
     component.searchTerm = 'Software';
@@ -126,7 +126,7 @@ describe('ApplicantDashboardComponent', () => {
   });
 
   it('should open application modal', () => {
-    const mockApplication = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' };
+    const mockApplication = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' };
     
     component.viewApplication(mockApplication);
     
@@ -136,7 +136,7 @@ describe('ApplicantDashboardComponent', () => {
 
   it('should close application modal', () => {
     component.showApplicationModal = true;
-    component.selectedApplication = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' };
+    component.selectedApplication = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' };
     
     component.closeApplicationModal();
     
@@ -146,7 +146,7 @@ describe('ApplicantDashboardComponent', () => {
 
   it('should withdraw application', () => {
     spyOn(window, 'confirm').and.returnValue(true);
-    const mockApplication = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' };
+    const mockApplication = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' };
     component.applications = [mockApplication];
     
     component.withdrawApplication(mockApplication);
@@ -156,7 +156,7 @@ describe('ApplicantDashboardComponent', () => {
 
   it('should not withdraw application when user cancels', () => {
     spyOn(window, 'confirm').and.returnValue(false);
-    const mockApplication = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' };
+    const mockApplication = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' };
     component.applications = [mockApplication];
     
     component.withdrawApplication(mockApplication);
@@ -196,22 +196,23 @@ describe('ApplicantDashboardComponent', () => {
   });
 
   it('should get employment type label correctly', () => {
-    expect(component.getEmploymentTypeLabel('Full_Time')).toBe('Full Time');
-    expect(component.getEmploymentTypeLabel('Part_Time')).toBe('Part Time');
+    expect(component.getEmploymentTypeLabel('Plantilla')).toBe('Plantilla (Regular)');
     expect(component.getEmploymentTypeLabel('Contractual')).toBe('Contractual');
+    expect(component.getEmploymentTypeLabel('Casual')).toBe('Casual');
+    expect(component.getEmploymentTypeLabel('Contract_Of_Service')).toBe('Contract of Service');
   });
 
   it('should check if application is expired', () => {
-    const expiredApp = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date('2020-01-01'), salaryRange: 'Test', employmentType: 'Full_Time' };
-    const validApp = { id: '2', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date('2030-01-01'), salaryRange: 'Test', employmentType: 'Full_Time' };
+    const expiredApp = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date('2020-01-01'), salaryRange: 'Test', employmentType: 'Plantilla' };
+    const validApp = { id: '2', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date('2030-01-01'), salaryRange: 'Test', employmentType: 'Plantilla' };
     
     expect(component.isApplicationExpired(expiredApp)).toBe(true);
     expect(component.isApplicationExpired(validApp)).toBe(false);
   });
 
   it('should calculate application progress correctly', () => {
-    const pendingApp = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' };
-    const acceptedApp = { id: '2', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'accepted', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' };
+    const pendingApp = { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' };
+    const acceptedApp = { id: '2', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'accepted', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' };
     
     expect(component.getApplicationProgress(pendingApp)).toBe(20); // 1/5 * 100
     expect(component.getApplicationProgress(acceptedApp)).toBe(100); // 5/5 * 100
@@ -240,7 +241,7 @@ describe('ApplicantDashboardComponent', () => {
 
   it('should update interview service when applications change', () => {
     component.applications = [
-      { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'interviewed', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time', time: '10:00 AM' }
+      { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'interviewed', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla', time: '10:00 AM' }
     ];
     
     component.updateInterviewService();
@@ -292,7 +293,7 @@ describe('ApplicantDashboardComponent', () => {
 
     it('should display applications list', () => {
       component.applications = [
-        { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Full_Time' }
+        { id: '1', jobTitle: 'Test', company: 'Test', department: 'Test', applicationDate: new Date(), status: 'pending', lastUpdated: new Date(), applicationDeadline: new Date(), salaryRange: 'Test', employmentType: 'Plantilla' }
       ];
       fixture.detectChanges();
       

@@ -556,6 +556,13 @@
   padding: 1rem;
 }
 
+// Darken sidebar when modal is open
+body.modal-open .sidebar {
+  z-index: 999 !important;
+  filter: brightness(0.7);
+  transition: filter 0.3s ease;
+}
+
 .approval-modal {
   background: white;
   border-radius: 0.75rem;

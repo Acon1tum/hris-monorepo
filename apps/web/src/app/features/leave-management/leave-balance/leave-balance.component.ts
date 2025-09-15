@@ -88,6 +88,8 @@ export class LeaveBalanceComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    // Clean up modal-open class from body
+    document.body.classList.remove('modal-open');
   }
 
   /**
@@ -303,7 +305,9 @@ export class LeaveBalanceComponent implements OnInit, OnDestroy {
    */
   viewDetails(employee: EmployeeLeaveBalance): void {
     this.selectedEmployee = employee;
-      this.showEmployeeModal = true;
+    this.showEmployeeModal = true;
+    // Add modal-open class to body to darken sidebar
+    document.body.classList.add('modal-open');
   }
 
   /**
@@ -312,6 +316,8 @@ export class LeaveBalanceComponent implements OnInit, OnDestroy {
   closeEmployeeModal(): void {
     this.showEmployeeModal = false;
     this.selectedEmployee = null;
+    // Remove modal-open class from body
+    document.body.classList.remove('modal-open');
   }
 
   /**
@@ -334,6 +340,8 @@ export class LeaveBalanceComponent implements OnInit, OnDestroy {
     }
     
     this.showEmployeeAdjustModal = true;
+    // Add modal-open class to body to darken sidebar
+    document.body.classList.add('modal-open');
   }
 
   /**
@@ -351,6 +359,8 @@ export class LeaveBalanceComponent implements OnInit, OnDestroy {
       reason: ''
     });
     this.adjustmentError = '';
+    // Remove modal-open class from body
+    document.body.classList.remove('modal-open');
   }
 
   /**
@@ -426,6 +436,8 @@ export class LeaveBalanceComponent implements OnInit, OnDestroy {
           this.personnelToReceiveCredits = result.personnelToReceiveCredits || [];
           this.personnelWithExistingCredits = result.personnelWithExistingCredits || [];
           this.showBulkInitializeModal = true;
+          // Add modal-open class to body to darken sidebar
+          document.body.classList.add('modal-open');
         },
         error: (error) => {
           this.isBulkInitializing = false;
@@ -441,6 +453,8 @@ export class LeaveBalanceComponent implements OnInit, OnDestroy {
    */
   closeBulkInitializeModal(): void {
     this.showBulkInitializeModal = false;
+    // Remove modal-open class from body
+    document.body.classList.remove('modal-open');
   }
 
   /**
@@ -461,6 +475,8 @@ export class LeaveBalanceComponent implements OnInit, OnDestroy {
           this.bulkInitializeResult = result; // Store result for display
           this.personnelToReceiveCredits = result.personnel_to_receive_credits || [];
           this.personnelWithExistingCredits = result.personnel_with_existing_credits || [];
+          // Add modal-open class to body to darken sidebar
+          document.body.classList.add('modal-open');
         },
         error: (error) => {
           this.isBulkInitializing = false;
@@ -479,6 +495,8 @@ export class LeaveBalanceComponent implements OnInit, OnDestroy {
     this.bulkInitializeResult = null;
     this.personnelToReceiveCredits = [];
     this.personnelWithExistingCredits = [];
+    // Remove modal-open class from body
+    document.body.classList.remove('modal-open');
   }
 
   /**

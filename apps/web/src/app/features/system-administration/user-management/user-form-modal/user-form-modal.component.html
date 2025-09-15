@@ -1,0 +1,167 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="onClose()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        {{ isEdit ? 'Edit User' : 'Create New User' }}
+      </h2>
+      <button class="close-btn" (click)="onClose()" type="button">
+        <svg fill="none" height="24px" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24px" xmlns="http://www.w3.org/2000/svg">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Error Message -->
+      <div *ngIf="error" class="error-message">
+        <svg fill="currentColor" height="20px" viewBox="0 0 24 24" width="20px" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+        {{ error }}
+      </div>
+
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <!-- Username -->
+          <div class="form-group">
+            <label for="username" class="form-label">
+              Username <span class="required">*</span>
+            </label>
+            <input
+              id="username"
+              type="text"
+              class="form-input"
+              [class.error]="isFieldInvalid('username')"
+              [class.disabled]="isEdit"
+              formControlName="username"
+              placeholder="Enter username"
+              [disabled]="isEdit"
+            />
+            <div *ngIf="isFieldInvalid('username')" class="field-error">
+              {{ getFieldError('username') }}
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email" class="form-label">
+              Email <span class="required">*</span>
+            </label>
+            <input
+              id="email"
+              type="email"
+              class="form-input"
+              [class.error]="isFieldInvalid('email')"
+              [class.disabled]="isEdit"
+              formControlName="email"
+              placeholder="Enter email address"
+              [disabled]="isEdit"
+            />
+            <div *ngIf="isFieldInvalid('email')" class="field-error">
+              {{ getFieldError('email') }}
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="password" class="form-label">
+              Password <span class="required">*</span>
+              <span *ngIf="isEdit" class="optional-text">(leave blank to keep current)</span>
+            </label>
+            <input
+              id="password"
+              type="password"
+              class="form-input"
+              [class.error]="isFieldInvalid('password')"
+              formControlName="password"
+              [placeholder]="isEdit ? 'Enter new password (optional)' : 'Enter password'"
+            />
+            <div *ngIf="isFieldInvalid('password')" class="field-error">
+              {{ getFieldError('password') }}
+            </div>
+          </div>
+
+          <!-- Role -->
+          <div class="form-group">
+            <label for="role" class="form-label">
+              Role <span class="required">*</span>
+            </label>
+            <select
+              id="role"
+              class="form-select"
+              [class.error]="isFieldInvalid('role')"
+              formControlName="role"
+            >
+              <option value="">Select a role</option>
+              <option *ngFor="let role of availableRoles" [value]="role">
+                {{ role }}
+              </option>
+            </select>
+            <div *ngIf="isFieldInvalid('role')" class="field-error">
+              {{ getFieldError('role') }}
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="form-group">
+            <label for="status" class="form-label">
+              Status <span class="required">*</span>
+            </label>
+            <select
+              id="status"
+              class="form-select"
+              [class.error]="isFieldInvalid('status')"
+              formControlName="status"
+            >
+              <option *ngFor="let status of availableStatuses" [value]="status">
+                {{ status }}
+              </option>
+            </select>
+            <div *ngIf="isFieldInvalid('status')" class="field-error">
+              {{ getFieldError('status') }}
+            </div>
+          </div>
+
+          <!-- Profile Picture -->
+          <div class="form-group full-width">
+            <label for="profilePicture" class="form-label">
+              Profile Picture URL
+            </label>
+            <input
+              id="profilePicture"
+              type="url"
+              class="form-input"
+              [class.error]="isFieldInvalid('profilePicture')"
+              formControlName="profilePicture"
+              placeholder="Enter profile picture URL (optional)"
+            />
+            <div *ngIf="isFieldInvalid('profilePicture')" class="field-error">
+              {{ getFieldError('profilePicture') }}
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="onClose()"
+        [disabled]="loading"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="onSubmit()"
+        [disabled]="loading || userForm.invalid"
+      >
+        <div *ngIf="loading" class="loading-spinner-small"></div>
+        {{ loading ? 'Saving...' : (isEdit ? 'Update User' : 'Create User') }}
+      </button>
+    </div>
+  </div>
+</div>
