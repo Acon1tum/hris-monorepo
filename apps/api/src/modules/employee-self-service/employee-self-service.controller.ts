@@ -17,15 +17,18 @@ function mapPersonnelToUserProfile(personnel: any) {
       address: personnel.address || '',
       email: personnel.user?.email || '',
       gender: personnel.gender || '',
-      civilStatus: personnel.civil_status || ''
+      civilStatus: personnel.civil_status || '',
+      citizenship: personnel.citizenship || 'Filipino'
     },
     employment: {
       employmentType: personnel.employment_type || '',
-      designation: personnel.designation || '',
+      designation: personnel.job_title?.title || '',
       department: personnel.department?.department_name || '',
       appointmentDate: personnel.date_hired ? new Date(personnel.date_hired).toLocaleDateString() : '',
       startDate: personnel.date_hired ? new Date(personnel.date_hired).toLocaleDateString() : '',
-      employmentStatus: personnel.user?.status || ''
+      employmentStatus: personnel.user?.status || 'Active',
+      jobLevel: personnel.job_title?.position_classification || '',
+      jobGrade: personnel.job_title?.salary_grade || ''
     },
     membership: {
       gsis: personnel.gsis_number || '',
@@ -33,7 +36,12 @@ function mapPersonnelToUserProfile(personnel: any) {
       philhealth: personnel.philhealth_number || '',
       sss: personnel.sss_number || ''
     },
-    other: {}
+    other: {
+      dependents: '0',
+      emergencyContactName: '',
+      emergencyContactNumber: '',
+      emergencyContactRelationship: ''
+    }
   };
 }
 
@@ -41,7 +49,14 @@ export class EmployeeSelfServiceController {
   static async getMyProfile(req: AuthRequest, res: Response) {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId }, include: { department: true, user: true } });
+    const personnel = await prisma.personnel.findFirst({ 
+      where: { user_id: userId }, 
+      include: { 
+        department: true, 
+        user: true, 
+        job_title: true 
+      } 
+    });
     if (!personnel) return res.status(404).json({ success: false, message: 'Profile not found' });
     const userProfile = mapPersonnelToUserProfile(personnel);
     res.json({ success: true, data: userProfile });

@@ -366,6 +366,7 @@ model Personnel {
   date_of_birth   DateTime?
   gender          Gender?
   civil_status    CivilStatus?
+  citizenship     String?     @default("Filipino")
   contact_number  String?
   address         String?
   department_id   String?

@@ -43,7 +43,7 @@ router.get('/', (req: Request, res: Response) => {
 
 // Mount module routes
 router.use('/auth', authRoutes);
-router.use('/employees', employeeRoutes);
+router.use('/employee-self-service', employeeRoutes);
 router.use('/personnel', personnelRoutes);
 router.use('/leaves', leaveRoutes);
 router.use('/leave', leaveRoutes); // Alias for frontend compatibility
