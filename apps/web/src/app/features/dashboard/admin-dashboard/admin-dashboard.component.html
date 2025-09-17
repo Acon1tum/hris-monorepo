@@ -51,7 +51,7 @@
         </div>
         <div class="card-content">
           <h3>Active Attendance</h3>
-          <p class="card-number">{{ dashboardStats.attendanceOverview.present | number }}</p>
+          <p class="card-number">{{ dashboardStats.attendanceOverview?.present | number }}</p>
           <p class="card-change">{{ getAttendancePercentage() }}% attendance rate</p>
         </div>
       </div>

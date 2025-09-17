@@ -61,10 +61,16 @@ export class AdminDashboardService {
           activeEmployees: response.data.active,
           pendingLeaveRequests: 0, // This would come from leave service
           payrollStatus: 'Ready', // This would come from payroll service
-          departmentStats: response.data.departmentStats,
-          employmentTypeStats: response.data.employmentTypeStats,
-          recentActivities: response.data.recentActivities,
-          attendanceOverview: response.data.attendanceOverview
+          departmentStats: response.data.departmentStats || [],
+          employmentTypeStats: response.data.employmentTypeStats || [],
+          recentActivities: response.data.recentActivities || [],
+          attendanceOverview: response.data.attendanceOverview || {
+            present: 0,
+            absent: 0,
+            late: 0,
+            onLeave: 0,
+            total: 0
+          }
         })),
         catchError(error => {
           console.error('Error fetching dashboard stats:', error);

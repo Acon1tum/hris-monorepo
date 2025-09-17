@@ -242,7 +242,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     event.preventDefault();
     event.stopPropagation();
 
-    // If sidebar is collapsed and not mobile, expand it
+    // If sidebar is collapsed and not mobile, expand it first
     if (this.isCollapsed && !this.isMobile) {
       this.isCollapsed = false;
       this.isOpen = true;
@@ -253,9 +253,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Toggle the submenu expansion state
     if (this.expandedItem === itemName) {
+      // If already expanded, collapse it
       this.expandedItem = null;
     } else {
+      // If not expanded, expand it
       this.expandedItem = itemName;
     }
   }
