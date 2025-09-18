@@ -3,6 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JobPortalManagementService, JobPosting, Department, SalaryRange, ApiResponse } from './job-portal-management.service';
 
+// Toast interface
+interface Toast {
+  id: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+  title: string;
+  message: string;
+  duration?: number;
+}
+
 @Component({
   selector: 'app-job-portal-management',
   standalone: true,
@@ -22,6 +31,14 @@ export class JobPortalManagementComponent implements OnInit, OnDestroy {
   loading = false;
   errorMessage = '';
   successMessage = '';
+  
+  // Enhanced loading states
+  operationLoading = false;
+  operationJobId: string | null = null;
+  operationType: 'create' | 'update' | 'delete' | 'edit' | 'status' | null = null;
+  
+  // Toast notifications
+  toasts: Toast[] = [];
   
   departments: Department[] = [];
   salaryRanges: SalaryRange[] = [];
@@ -211,27 +228,39 @@ export class JobPortalManagementComponent implements OnInit, OnDestroy {
     console.log('=== EDITING JOB ===');
     console.log('Job to edit:', job);
     
-    // Create a copy of the job for editing
-    const jobToEdit = { ...job };
+    // Set loading state for edit operation
+    this.setOperationLoading(true, job.id || null, 'edit');
     
-    // Convert salary range value back to ID for the dropdown
-    if (jobToEdit.salary_range) {
-      jobToEdit.salary_range = this.convertSalaryRangeValueToId(jobToEdit.salary_range);
-    }
-    
-    // Format application_deadline for HTML date input (YYYY-MM-DD)
-    if (jobToEdit.application_deadline) {
-      jobToEdit.application_deadline = this.formatDateForInput(jobToEdit.application_deadline);
-    }
-    
-    console.log('Job to edit after conversion:', jobToEdit);
-    
-    this.jobPosting = jobToEdit;
-    this.showForm = true;
-    this.isEdit = true;
-    this.editJobId = job.id || null;
-    this.clearMessages();
-    this.setModalActive(true);
+    // Simulate a brief loading state for better UX
+    setTimeout(() => {
+      // Create a copy of the job for editing
+      const jobToEdit = { ...job };
+      
+      // Convert salary range value back to ID for the dropdown
+      if (jobToEdit.salary_range) {
+        jobToEdit.salary_range = this.convertSalaryRangeValueToId(jobToEdit.salary_range);
+      }
+      
+      // Format application_deadline for HTML date input (YYYY-MM-DD)
+      if (jobToEdit.application_deadline) {
+        jobToEdit.application_deadline = this.formatDateForInput(jobToEdit.application_deadline);
+      }
+      
+      console.log('Job to edit after conversion:', jobToEdit);
+      
+      this.jobPosting = jobToEdit;
+      this.showForm = true;
+      this.isEdit = true;
+      this.editJobId = job.id || null;
+      this.clearMessages();
+      this.setModalActive(true);
+      
+      // Clear loading state
+      this.setOperationLoading(false);
+      
+      // Show success toast
+      this.showToast('info', 'Edit Mode', 'Job posting loaded for editing');
+    }, 300);
   }
 
   onDeleteJob(job: JobPosting) {
@@ -239,29 +268,37 @@ export class JobPortalManagementComponent implements OnInit, OnDestroy {
     console.log('Job to delete:', job);
     
     if (confirm('Are you sure you want to delete this job posting? This action cannot be undone.')) {
-      this.loading = true;
+      this.setOperationLoading(true, job.id || null, 'delete');
       this.clearMessages();
 
       this.jobService.deleteJobPosting(job.id!).subscribe({
         next: (response: ApiResponse<any>) => {
           console.log('Job deleted successfully:', response);
-          this.showSuccessMessage('Job posting deleted successfully!');
+          
+          // Show success toast
+          this.showToast('success', 'Job Deleted', 'Job posting has been successfully deleted');
+          
+          // Add success animation to the card before removal
+          this.animateCardExit(job.id!);
           
           // Force refresh the job list after deletion
           setTimeout(() => {
             this.freshStart();
-          }, 500);
+            this.setOperationLoading(false);
+          }, 1000);
         },
         error: (error) => {
           console.error('Error deleting job:', error);
+          this.setOperationLoading(false);
+          
+          let errorMessage = 'Failed to delete job posting. Please try again.';
           if (error.status === 404) {
-            this.errorMessage = 'Job posting not found. It may have been deleted.';
+            errorMessage = 'Job posting not found. It may have been deleted.';
           } else if (error.status === 400) {
-            this.errorMessage = error.error?.message || 'Cannot delete job posting with existing applications.';
-          } else {
-            this.errorMessage = 'Failed to delete job posting. Please try again.';
+            errorMessage = error.error?.message || 'Cannot delete job posting with existing applications.';
           }
-          this.loading = false;
+          
+          this.showToast('error', 'Delete Failed', errorMessage);
         }
       });
     }
@@ -279,29 +316,37 @@ export class JobPortalManagementComponent implements OnInit, OnDestroy {
 
   onUpdateStatus(job: JobPosting, newStatus: string) {
     console.log('=== UPDATING STATUS ===');
-    this.loading = true;
+    this.setOperationLoading(true, job.id || null, 'status');
     this.clearMessages();
 
     this.jobService.updateJobPostingStatus(job.id!, newStatus).subscribe({
       next: (response: ApiResponse<JobPosting>) => {
         console.log('Status updated successfully:', response);
-        this.showSuccessMessage(`Job posting status updated to ${newStatus}!`);
+        
+        // Show success toast
+        this.showToast('success', 'Status Updated', `Job posting status updated to ${newStatus}`);
+        
+        // Add success animation to the card
+        this.animateCardSuccess(job.id!);
         
         // Force refresh the job list after status update
         setTimeout(() => {
           this.freshStart();
-        }, 500);
+          this.setOperationLoading(false);
+        }, 800);
       },
       error: (error) => {
         console.error('Error updating status:', error);
+        this.setOperationLoading(false);
+        
+        let errorMessage = 'Failed to update job posting status. Please try again.';
         if (error.status === 404) {
-          this.errorMessage = 'Job posting not found. It may have been deleted.';
+          errorMessage = 'Job posting not found. It may have been deleted.';
         } else if (error.status === 400) {
-          this.errorMessage = error.error?.message || 'Invalid status provided.';
-        } else {
-          this.errorMessage = 'Failed to update job posting status. Please try again.';
+          errorMessage = error.error?.message || 'Invalid status provided.';
         }
-        this.loading = false;
+        
+        this.showToast('error', 'Status Update Failed', errorMessage);
       }
     });
   }
@@ -320,6 +365,7 @@ export class JobPortalManagementComponent implements OnInit, OnDestroy {
         !this.jobPosting.application_deadline) {
       this.errorMessage = 'Please fill in all required fields.';
       this.loading = false;
+      this.showToast('warning', 'Validation Error', 'Please fill in all required fields');
       return;
     }
 
@@ -330,6 +376,7 @@ export class JobPortalManagementComponent implements OnInit, OnDestroy {
         console.error('Department not found in local data:', this.jobPosting.department_id);
         this.errorMessage = 'Selected department is not valid. Please refresh the page and try again.';
         this.loading = false;
+        this.showToast('error', 'Validation Error', 'Selected department is not valid. Please refresh the page and try again.');
         return;
       }
       console.log('Department validated:', departmentExists.department_name);
@@ -361,24 +408,32 @@ export class JobPortalManagementComponent implements OnInit, OnDestroy {
       this.jobService.updateJobPosting(this.editJobId, jobData).subscribe({
         next: (response: ApiResponse<JobPosting>) => {
           console.log('Job updated successfully:', response);
-          this.showSuccessMessage('Job posting updated successfully!');
+          
+          // Show success toast
+          this.showToast('success', 'Job Updated', 'Job posting has been successfully updated');
+          
+          // Add success animation
+          this.animateCardSuccess(this.editJobId!);
+          
           this.closeForm();
           
           // Force refresh the job list after update
           setTimeout(() => {
             this.freshStart();
-          }, 500);
+          }, 800);
         },
         error: (error) => {
           console.error('Error updating job:', error);
-          if (error.status === 404) {
-            this.errorMessage = 'Job posting not found. It may have been deleted.';
-          } else if (error.status === 400) {
-            this.errorMessage = error.error?.message || 'Invalid data provided. Please check your input.';
-          } else {
-            this.errorMessage = 'Failed to update job posting. Please try again.';
-          }
           this.loading = false;
+          
+          let errorMessage = 'Failed to update job posting. Please try again.';
+          if (error.status === 404) {
+            errorMessage = 'Job posting not found. It may have been deleted.';
+          } else if (error.status === 400) {
+            errorMessage = error.error?.message || 'Invalid data provided. Please check your input.';
+          }
+          
+          this.showToast('error', 'Update Failed', errorMessage);
         }
       });
     } else {
@@ -388,22 +443,30 @@ export class JobPortalManagementComponent implements OnInit, OnDestroy {
       this.jobService.createJobPosting(jobData).subscribe({
         next: (response: ApiResponse<JobPosting>) => {
           console.log('Job created successfully:', response);
-          this.showSuccessMessage('Job posting created successfully!');
+          
+          // Show success toast
+          this.showToast('success', 'Job Created', 'New job posting has been successfully created');
+          
+          // Add success animation
+          this.animateCardSuccess(response.data.id!);
+          
           this.closeForm();
           
           // Force refresh the job list after creation
           setTimeout(() => {
             this.freshStart();
-          }, 500);
+          }, 800);
         },
         error: (error) => {
           console.error('Error creating job:', error);
-          if (error.status === 400) {
-            this.errorMessage = error.error?.message || 'Invalid data provided. Please check your input.';
-          } else {
-            this.errorMessage = 'Failed to create job posting. Please try again.';
-          }
           this.loading = false;
+          
+          let errorMessage = 'Failed to create job posting. Please try again.';
+          if (error.status === 400) {
+            errorMessage = error.error?.message || 'Invalid data provided. Please check your input.';
+          }
+          
+          this.showToast('error', 'Creation Failed', errorMessage);
         }
       });
     }
@@ -974,6 +1037,74 @@ export class JobPortalManagementComponent implements OnInit, OnDestroy {
     this.successMessage = '';
   }
 
+  // ===== TOAST NOTIFICATION METHODS =====
+
+  showToast(type: 'success' | 'error' | 'info' | 'warning', title: string, message: string, duration: number = 4000) {
+    const toast: Toast = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      type,
+      title,
+      message,
+      duration
+    };
+
+    this.toasts.push(toast);
+    this.cdr.detectChanges();
+
+    // Auto-remove toast after duration
+    setTimeout(() => {
+      this.removeToastById(toast.id);
+    }, duration);
+  }
+
+  removeToast(index: number) {
+    if (index >= 0 && index < this.toasts.length) {
+      this.toasts.splice(index, 1);
+      this.cdr.detectChanges();
+    }
+  }
+
+  removeToastById(id: string) {
+    const index = this.toasts.findIndex(toast => toast.id === id);
+    if (index >= 0) {
+      this.toasts.splice(index, 1);
+      this.cdr.detectChanges();
+    }
+  }
+
+  getToastIcon(type: string): string {
+    const icons = {
+      success: 'check_circle',
+      error: 'error',
+      info: 'info',
+      warning: 'warning'
+    };
+    return icons[type as keyof typeof icons] || 'info';
+  }
+
+  // ===== ENHANCED LOADING METHODS =====
+
+  setOperationLoading(loading: boolean, jobId: string | null = null, type: 'create' | 'update' | 'delete' | 'edit' | 'status' | null = null) {
+    this.operationLoading = loading;
+    this.operationJobId = jobId;
+    this.operationType = type;
+    this.cdr.detectChanges();
+  }
+
+  getOperationLoadingText(): string {
+    if (!this.operationType) return 'Loading...';
+    
+    const texts = {
+      create: 'Creating job posting...',
+      update: 'Updating job posting...',
+      delete: 'Deleting job posting...',
+      edit: 'Preparing to edit...',
+      status: 'Updating status...'
+    };
+    
+    return texts[this.operationType] || 'Loading...';
+  }
+
   // ===== HELPER METHODS =====
 
   getDepartmentName(departmentId: string): string {
@@ -1072,6 +1203,41 @@ export class JobPortalManagementComponent implements OnInit, OnDestroy {
         card.classList.remove('success-animation');
       }, 600);
     });
+  }
+
+  // ===== CARD ANIMATION METHODS =====
+
+  animateCardSuccess(jobId: string) {
+    console.log('=== ANIMATING CARD SUCCESS ===');
+    const cardElement = document.querySelector(`[data-index] .job-card-admin`);
+    if (cardElement) {
+      cardElement.classList.add('success-animation', 'bounce-animation');
+      setTimeout(() => {
+        cardElement.classList.remove('success-animation', 'bounce-animation');
+      }, 1000);
+    }
+  }
+
+  animateCardExit(jobId: string) {
+    console.log('=== ANIMATING CARD EXIT ===');
+    const cardElement = document.querySelector(`[data-index] .job-card-admin`);
+    if (cardElement) {
+      cardElement.classList.add('card-exit');
+      setTimeout(() => {
+        cardElement.classList.remove('card-exit');
+      }, 300);
+    }
+  }
+
+  animateCardEnter(jobId: string) {
+    console.log('=== ANIMATING CARD ENTER ===');
+    const cardElement = document.querySelector(`[data-index] .job-card-admin`);
+    if (cardElement) {
+      cardElement.classList.add('card-enter');
+      setTimeout(() => {
+        cardElement.classList.remove('card-enter');
+      }, 400);
+    }
   }
 
   setModalActive(active: boolean) {

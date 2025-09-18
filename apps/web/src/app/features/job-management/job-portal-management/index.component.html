@@ -76,7 +76,13 @@
     
     <!-- Job Cards -->
     <ng-container *ngIf="!loading && filteredJobs.length > 0; else noJobs">
-      <div class="job-card-admin" *ngFor="let job of filteredJobs; let i = index" [attr.data-index]="i">
+      <div 
+        class="job-card-admin" 
+        [class.loading]="operationLoading && operationJobId === job.id"
+        [class.card-enter]="!operationLoading"
+        *ngFor="let job of filteredJobs; let i = index" 
+        [attr.data-index]="i"
+      >
         <div class="job-card-header">
           <div class="job-info">
             <h3 class="job-title">{{ job.position_title }}</h3>
@@ -108,7 +114,7 @@
             [value]="job.posting_status" 
             (change)="onStatusChange(job, $event)"
             class="status-select"
-            [disabled]="loading"
+            [disabled]="loading || (operationLoading && operationJobId === job.id)"
           >
             <option value="Draft">Draft</option>
             <option value="Published">Published</option>
@@ -117,12 +123,37 @@
           </select>
           
           <div class="action-buttons">
-            <button class="action-btn edit" (click)="onEditJob(job)" title="Edit job" [disabled]="loading">
-            <span class="material-symbols-outlined">edit</span>
-          </button>
-            <button class="action-btn delete" (click)="onDeleteJob(job)" title="Delete job" [disabled]="loading">
-            <span class="material-symbols-outlined">delete</span>
-          </button>
+            <button 
+              class="action-btn edit" 
+              [class.btn-loading]="operationLoading && operationJobId === job.id && operationType === 'edit'"
+              (click)="onEditJob(job)" 
+              title="Edit job" 
+              [disabled]="loading || (operationLoading && operationJobId === job.id)"
+            >
+              <span *ngIf="!(operationLoading && operationJobId === job.id && operationType === 'edit')" class="material-symbols-outlined">edit</span>
+              <span *ngIf="operationLoading && operationJobId === job.id && operationType === 'edit'" class="loading-spinner"></span>
+            </button>
+            <button 
+              class="action-btn delete" 
+              [class.btn-loading]="operationLoading && operationJobId === job.id && operationType === 'delete'"
+              (click)="onDeleteJob(job)" 
+              title="Delete job" 
+              [disabled]="loading || (operationLoading && operationJobId === job.id)"
+            >
+              <span *ngIf="!(operationLoading && operationJobId === job.id && operationType === 'delete')" class="material-symbols-outlined">delete</span>
+              <span *ngIf="operationLoading && operationJobId === job.id && operationType === 'delete'" class="loading-spinner"></span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Loading Overlay for Individual Job Cards -->
+        <div 
+          *ngIf="operationLoading && operationJobId === job.id" 
+          class="loading-overlay"
+        >
+          <div class="loading-content">
+            <div class="loading-spinner-large"></div>
+            <div class="loading-text">{{ getOperationLoadingText() }}</div>
           </div>
         </div>
       </div>
@@ -359,14 +390,37 @@
         <button 
           type="submit" 
           class="primary-btn" 
-          [class.loading]="loading"
+          [class.btn-loading]="loading"
           [disabled]="!jobForm.form.valid || loading"
         >
           <span *ngIf="loading" class="loading-spinner"></span>
-          <span class="material-symbols-outlined">{{ isEdit ? 'save' : 'add' }}</span>
-          {{ isEdit ? 'Update' : 'Create' }} Job Posting
+          <span *ngIf="!loading" class="material-symbols-outlined">{{ isEdit ? 'save' : 'add' }}</span>
+          <span *ngIf="!loading" class="btn-text">{{ isEdit ? 'Update' : 'Create' }} Job Posting</span>
+          <span *ngIf="loading" class="btn-text">{{ isEdit ? 'Updating...' : 'Creating...' }}</span>
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Toast Notifications Container -->
+<div class="toast-container" *ngIf="toasts.length > 0">
+  <div 
+    *ngFor="let toast of toasts; let i = index" 
+    class="toast" 
+    [ngClass]="toast.type"
+  >
+    <span class="material-symbols-outlined toast-icon">{{ getToastIcon(toast.type) }}</span>
+    <div class="toast-content">
+      <div class="toast-title">{{ toast.title }}</div>
+      <div class="toast-message">{{ toast.message }}</div>
+    </div>
+    <button 
+      class="toast-close" 
+      (click)="removeToast(i)"
+      [attr.aria-label]="'Close ' + toast.title + ' notification'"
+    >
+      <span class="material-symbols-outlined">close</span>
+    </button>
   </div>
 </div> 
