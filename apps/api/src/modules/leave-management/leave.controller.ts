@@ -62,13 +62,25 @@ export class LeaveController {
     if (!userId) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
     const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, error: { message: 'Personnel record not found' } });
-    const { leave_type_id, start_date, end_date, reason, supporting_document } = req.body;
+    const { leave_type_id, start_date, end_date, reason } = req.body as any;
+    // If multipart upload was used, multer adds req.file
+    // Persist only the stored filename; frontend can reconstruct URL
+    const uploadedFileName = (req as any).file?.filename as string | undefined;
     if (!leave_type_id || !start_date || !end_date) return res.status(400).json({ success: false, error: { message: 'Missing required fields' } });
     const startDate = new Date(start_date);
     const endDate = new Date(end_date);
     const total_days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)) + 1;
     const application = await prisma.leaveApplication.create({
-      data: { personnel_id: personnel.id, leave_type_id, start_date: startDate, end_date: endDate, total_days, reason, supporting_document, status: 'Pending' },
+      data: {
+        personnel_id: personnel.id,
+        leave_type_id,
+        start_date: startDate,
+        end_date: endDate,
+        total_days,
+        reason,
+        supporting_document: uploadedFileName ?? (req.body as any).supporting_document ?? undefined,
+        status: 'Pending'
+      },
       include: { leave_type: true }
     });
     res.status(201).json({ success: true, data: application });

@@ -1,8 +1,30 @@
 import { Router } from 'express';
 import { authenticateToken, requireRole } from '../../middleware/auth';
 import { LeaveController } from './leave.controller';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 const router: ReturnType<typeof Router> = Router();
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../../../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Configure multer storage for supporting documents
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (_req, file, cb) => {
+    const timestamp = Date.now();
+    const sanitizedOriginal = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    cb(null, `${timestamp}-${sanitizedOriginal}`);
+  }
+});
+const upload = multer({ storage });
 
 router.get('/', (req, res) => {
   res.json({ success: true, message: 'Leave Management module - API ready' });
@@ -12,7 +34,7 @@ router.get('/', (req, res) => {
 router.get('/applications', authenticateToken, requireRole(['Admin', 'HR']), LeaveController.getLeaveApplications);
 router.get('/applications/my', authenticateToken, requireRole(['Employee', 'Admin', 'HR']), LeaveController.getMyLeaveApplications);
 router.get('/applications/pending', authenticateToken, requireRole(['Admin', 'HR']), LeaveController.getPendingApplications);
-router.post('/applications', authenticateToken, requireRole(['Employee', 'Admin', 'HR']), LeaveController.createLeaveApplication);
+router.post('/applications', authenticateToken, requireRole(['Employee', 'Admin', 'HR']), upload.single('supporting_document'), LeaveController.createLeaveApplication);
 router.put('/applications/:id', authenticateToken, requireRole(['Employee', 'Admin', 'HR']), LeaveController.updateLeaveApplication);
 router.delete('/applications/:id', authenticateToken, requireRole(['Employee', 'Admin', 'HR']), LeaveController.cancelLeaveApplication);
 router.put('/applications/:id/approve', authenticateToken, requireRole(['Admin', 'HR']), LeaveController.approveLeaveApplication);
