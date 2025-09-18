@@ -47,7 +47,7 @@ export class JobPortalService {
 
   // Get all published job postings
   getJobs(filters?: JobFilters): Observable<JobPosting[]> {
-    let url = `${environment.apiUrl}/job-portal/jobs`;
+    let url = `${environment.apiUrl}/job-applications/jobs`;
     
     if (filters) {
       const params = new URLSearchParams();
@@ -68,7 +68,7 @@ export class JobPortalService {
 
   // Get a specific job posting
   getJob(id: string): Observable<JobPosting> {
-    return this.http.get<{ success: boolean; data: JobPosting }>(`${environment.apiUrl}/job-portal/jobs/${id}`)
+    return this.http.get<{ success: boolean; data: JobPosting }>(`${environment.apiUrl}/job-applications/jobs/${id}`)
       .pipe(
         map(response => response.data)
       );
@@ -76,7 +76,7 @@ export class JobPortalService {
 
   // Get salary ranges
   getSalaryRanges(): Observable<string[]> {
-    return this.http.get<{ success: boolean; data: string[] }>(`${environment.apiUrl}/job-portal/salary-ranges`)
+    return this.http.get<{ success: boolean; data: string[] }>(`${environment.apiUrl}/job-applications/salary-ranges`)
       .pipe(
         map(response => response.data || [])
       );
@@ -84,7 +84,7 @@ export class JobPortalService {
 
   // Get departments
   getDepartments(): Observable<string[]> {
-    return this.http.get<{ success: boolean; data: string[] }>(`${environment.apiUrl}/job-portal/departments`)
+    return this.http.get<{ success: boolean; data: string[] }>(`${environment.apiUrl}/job-applications/departments`)
       .pipe(
         map(response => response.data || [])
       );
@@ -92,7 +92,7 @@ export class JobPortalService {
 
   // Apply to a job
   applyToJob(jobId: string, applicationData: any): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/job-portal/applications`, {
+    return this.http.post(`${environment.apiUrl}/job-applications/applications`, {
       position_id: jobId,
       ...applicationData
     });

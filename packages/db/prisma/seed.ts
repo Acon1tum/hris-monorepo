@@ -587,6 +587,78 @@ async function main() {
     ]
   });
 
+  // Create Job Postings
+  console.log('💼 Creating job postings...');
+  const jobPostings = await prisma.jobPosting.createMany({
+    data: [
+      {
+        job_title_id: adminTitle.id,
+        department_id: hrDepartment.id,
+        job_description: 'We are seeking a highly motivated Administrative Officer V to join our Human Resources Management Office. The successful candidate will be responsible for providing administrative support, managing personnel records, and assisting with HR processes.',
+        qualifications: 'Bachelor\'s degree in Public Administration, Business Administration, or related field. At least 2 years of relevant experience in administrative work. Proficient in Microsoft Office applications. Excellent communication and organizational skills.',
+        technical_competencies: 'Document management, Records keeping, Report preparation, Data analysis, Customer service, Office procedures',
+        salary_range: '₱50,000 - ₱65,000',
+        employment_type: 'Plantilla',
+        num_vacancies: 2,
+        application_deadline: new Date('2024-12-31'),
+        posting_status: 'Published',
+        created_by: hrDirectorUser.id
+      },
+      {
+        job_title_id: programmerTitle.id,
+        department_id: itDepartment.id,
+        job_description: 'Join our Information Technology Division as a Computer Programmer III. You will be responsible for developing, maintaining, and supporting various software applications used by the agency.',
+        qualifications: 'Bachelor\'s degree in Computer Science, Information Technology, or related field. At least 3 years of programming experience. Knowledge of modern programming languages (JavaScript, Python, Java, C#). Experience with databases and web development.',
+        technical_competencies: 'Software development, Database management, Web development, System analysis, Programming languages, Debugging and testing',
+        salary_range: '₱50,000 - ₱65,000',
+        employment_type: 'Plantilla',
+        num_vacancies: 1,
+        application_deadline: new Date('2024-12-15'),
+        posting_status: 'Published',
+        created_by: itChiefUser.id
+      },
+      {
+        job_title_id: aideTitle.id,
+        department_id: financeDepartment.id,
+        job_description: 'The Finance and Administration Department is looking for an Administrative Aide VI to provide clerical and administrative support. This position involves handling financial documents, data entry, and general office duties.',
+        qualifications: 'High school diploma or equivalent. At least 1 year of clerical experience. Basic computer skills. Good attention to detail and organizational abilities.',
+        technical_competencies: 'Data entry, Document filing, Basic accounting, Office equipment operation, Customer service, Record keeping',
+        salary_range: '₱20,000 - ₱25,000',
+        employment_type: 'Plantilla',
+        num_vacancies: 3,
+        application_deadline: new Date('2024-11-30'),
+        posting_status: 'Published',
+        created_by: financeDirectorUser.id
+      },
+      {
+        job_title_id: chiefTitle.id,
+        department_id: legalDepartment.id,
+        job_description: 'We are seeking a Chief Administrative Officer for our Legal Division. This position involves overseeing administrative operations, managing legal documents, and coordinating with various departments on legal matters.',
+        qualifications: 'Bachelor\'s degree in Law, Public Administration, or related field. At least 5 years of administrative experience, preferably in a legal environment. Strong leadership and management skills. Knowledge of government procedures and legal processes.',
+        technical_competencies: 'Administrative management, Legal document handling, Policy development, Staff supervision, Budget management, Compliance monitoring',
+        salary_range: '₱80,000 - ₱100,000',
+        employment_type: 'Plantilla',
+        num_vacancies: 1,
+        application_deadline: new Date('2024-12-20'),
+        posting_status: 'Published',
+        created_by: legalChiefUser.id
+      },
+      {
+        job_title_id: directorTitle.id,
+        department_id: itDepartment.id,
+        job_description: 'The Information Technology Division is looking for a Director III to lead our IT operations and strategic initiatives. This senior position involves overseeing IT projects, managing the IT team, and ensuring the agency\'s technology needs are met.',
+        qualifications: 'Master\'s degree in Information Technology, Computer Science, or related field. At least 8 years of IT experience with 3 years in a leadership role. Strong project management skills. Knowledge of government IT systems and cybersecurity.',
+        technical_competencies: 'IT strategy, Project management, Team leadership, System architecture, Cybersecurity, Budget planning, Vendor management',
+        salary_range: '₱120,000 - ₱150,000',
+        employment_type: 'Plantilla',
+        num_vacancies: 1,
+        application_deadline: new Date('2024-12-25'),
+        posting_status: 'Published',
+        created_by: secretaryUser.id
+      }
+    ]
+  });
+
   console.log('✅ Database seeding completed successfully!');
   console.log('\n📊 Summary:');
   console.log('- System Settings: 11');
@@ -596,6 +668,7 @@ async function main() {
   console.log('- Users: 8');
   console.log('- Personnel Records: 8');
   console.log('- Leave Types: 6');
+  console.log('- Job Postings: 5');
   console.log('\n🔑 Default login credentials:');
   console.log('Username: secretary | Password: password123 (Admin)');
   console.log('Username: hr_director | Password: password123 (HR)');

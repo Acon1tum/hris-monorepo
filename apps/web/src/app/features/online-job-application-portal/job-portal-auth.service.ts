@@ -71,7 +71,7 @@ export class JobPortalAuthService {
 
     log('Sending login request to server...');
     
-    return this.http.post<JobPortalLoginResponse>(`${environment.apiUrl}/job-portal/login`, { 
+    return this.http.post<JobPortalLoginResponse>(`${environment.apiUrl}/job-applications/login`, { 
       email: email.trim(),
       password: password 
     }).pipe(
@@ -165,19 +165,19 @@ export class JobPortalAuthService {
 
   getCurrentApplicantProfile(): Observable<JobApplicant> {
     return this.http.get<{ success: boolean; data: JobApplicant }>(
-      `${environment.apiUrl}/job-portal/current-profile`
+      `${environment.apiUrl}/job-applications/current-profile`
     ).pipe(
       map(response => response.data)
     );
   }
 
   register(registrationData: any): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/job-portal/register`, registrationData);
+    return this.http.post(`${environment.apiUrl}/job-applications/register`, registrationData);
   }
 
   getProfile(applicantId: string): Observable<JobApplicant> {
     return this.http.get<{ success: boolean; data: JobApplicant }>(
-      `${environment.apiUrl}/job-portal/profile?applicantId=${applicantId}`
+      `${environment.apiUrl}/job-applications/profile?applicantId=${applicantId}`
     ).pipe(
       map(response => response.data)
     );
@@ -185,7 +185,7 @@ export class JobPortalAuthService {
 
   updateProfile(applicantId: string, updateData: any): Observable<JobApplicant> {
     return this.http.put<{ success: boolean; data: JobApplicant }>(
-      `${environment.apiUrl}/job-portal/profile?applicantId=${applicantId}`,
+      `${environment.apiUrl}/job-applications/profile?applicantId=${applicantId}`,
       updateData
     ).pipe(
       map(response => response.data)
