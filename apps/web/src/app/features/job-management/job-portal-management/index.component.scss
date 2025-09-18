@@ -3,10 +3,15 @@
   display: flex;
   gap: 1.5rem;
   align-items: flex-start;
-  max-width: 1400px;
-  margin: 1rem auto;
-  padding: 0 1rem;
-  min-height: calc(100vh - 2rem);
+  /* Ensure the page uses the full available width and is properly centered */
+  width: 100%;
+  max-width: 100%;
+  margin: 2rem auto;
+  padding: 0 2rem;
+  min-height: calc(100vh - 4rem);
+  /* Add proper spacing from header and sidebar */
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .job-portal-management-container {
@@ -19,11 +24,33 @@
 .job-cards-panel {
   flex: 1;
   min-width: 0;
+  /* Allow the right panel to fill remaining space and fit the screen */
+  width: 100%;
   background: #ffffff;
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #e5e7eb;
+  /* Ensure content doesn't overflow and is properly contained */
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* When the app adds sidebar state classes at the host/root level, make sure
+   our page still stretches edge-to-edge without unexpected gaps. */
+:host-context(.sidebar-collapsed) .job-portal-management-flex,
+:host-context(.sidebar-open) .job-portal-management-flex {
+  width: 100%;
+  max-width: 100%;
+  /* Adjust margins based on sidebar state for better centering */
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+/* Additional responsive adjustments for better centering */
+:host-context(.sidebar-collapsed) .job-portal-management-flex {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
 }
 
 // ===== HEADER SECTION =====
@@ -260,6 +287,10 @@
   padding: 1.25rem;
   margin-bottom: 1rem;
   transition: all 0.2s ease;
+  /* Ensure job cards don't overflow and are properly contained */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .job-card-admin:hover {
@@ -360,6 +391,9 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  /* Ensure actions don't overflow and wrap if needed */
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .status-select {
@@ -371,6 +405,9 @@
   color: #374151;
   cursor: pointer;
   min-width: 120px;
+  /* Ensure select doesn't overflow */
+  max-width: 150px;
+  flex-shrink: 1;
 }
 
 .status-select:focus {
@@ -382,6 +419,9 @@
 .action-buttons {
   display: flex;
   gap: 0.5rem;
+  /* Ensure buttons don't overflow */
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .action-btn {
@@ -841,11 +881,14 @@ body.modal-active .job-cards-panel {
   .job-portal-management-flex {
     flex-direction: column;
     gap: 1rem;
+    margin: 1.5rem auto;
+    padding: 0 1.5rem;
   }
   
   .job-portal-management-container {
     position: static;
     flex: none;
+    width: 100%;
   }
   
   .form-grid {
@@ -864,8 +907,8 @@ body.modal-active .job-cards-panel {
 
 @media (max-width: 768px) {
   .job-portal-management-flex {
-    margin: 0.5rem auto;
-    padding: 0 0.5rem;
+    margin: 1rem auto;
+    padding: 0 1rem;
   }
   
   .job-cards-panel {

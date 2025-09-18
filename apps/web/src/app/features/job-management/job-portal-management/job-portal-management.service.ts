@@ -60,7 +60,7 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class JobPortalManagementService {
-  private apiUrl = `${environment.apiUrl}/job-portal-management`;
+  private apiUrl = `${environment.apiUrl}/job-portal`;
 
   constructor(private http: HttpClient) {}
 

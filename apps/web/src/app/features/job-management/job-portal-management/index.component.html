@@ -1,5 +1,5 @@
 <div class="job-portal-management-flex">
-  <div class="job-portal-management-container sticky-left-panel">
+  <div class="job-portal-management-container">
     <div class="header-section">
     <h1>Job Portal Management</h1>
       <p>Manage job postings for the public application portal</p>
@@ -76,7 +76,7 @@
     
     <!-- Job Cards -->
     <ng-container *ngIf="!loading && filteredJobs.length > 0; else noJobs">
-      <div class="job-card-admin" *ngFor="let job of filteredJobs; let i = index">
+      <div class="job-card-admin" *ngFor="let job of filteredJobs; let i = index" [attr.data-index]="i">
         <div class="job-card-header">
           <div class="job-info">
             <h3 class="job-title">{{ job.position_title }}</h3>
