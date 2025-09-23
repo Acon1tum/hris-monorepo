@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { prisma } from '@hris/db';
+import { leaveDb, personnel as personnelDb } from '../../db/clients';
 import { AuthRequest } from '../../middleware/auth';
 
 export class LeaveController {
@@ -15,19 +15,16 @@ export class LeaveController {
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
     const [applications, total] = await Promise.all([
-      prisma.leaveApplication.findMany({
+      leaveDb.leaveApplication.findMany({
         where,
         include: {
-          personnel: {
-            select: { id: true, first_name: true, last_name: true, department: { select: { id: true, department_name: true } } }
-          },
           leave_type: true
         },
         skip,
         take,
         orderBy: { request_date: 'desc' }
       }),
-      prisma.leaveApplication.count({ where })
+      leaveDb.leaveApplication.count({ where })
     ]);
     res.json({ success: true, data: applications, pagination: { page: Number(page), limit: Number(limit), total, totalPages: Math.ceil(total / Number(limit)) } });
   }
@@ -35,9 +32,9 @@ export class LeaveController {
   static async getMyLeaveApplications(req: AuthRequest, res: Response) {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
+    const personnel = await personnelDb.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, error: { message: 'Personnel record not found' } });
-    const applications = await prisma.leaveApplication.findMany({
+    const applications = await leaveDb.leaveApplication.findMany({
       where: { personnel_id: personnel.id },
       include: { leave_type: true },
       orderBy: { request_date: 'desc' }
@@ -46,12 +43,9 @@ export class LeaveController {
   }
 
   static async getPendingApplications(req: Request, res: Response) {
-    const applications = await prisma.leaveApplication.findMany({
+    const applications = await leaveDb.leaveApplication.findMany({
       where: { status: 'Pending' },
-      include: {
-        personnel: { select: { id: true, first_name: true, last_name: true, department: { select: { id: true, department_name: true } } } },
-        leave_type: true
-      },
+      include: { leave_type: true },
       orderBy: { request_date: 'asc' }
     });
     res.json({ success: true, data: applications });
@@ -60,7 +54,7 @@ export class LeaveController {
   static async createLeaveApplication(req: AuthRequest, res: Response) {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
+    const personnel = await personnelDb.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, error: { message: 'Personnel record not found' } });
     const { leave_type_id, start_date, end_date, reason } = req.body as any;
     // If multipart upload was used, multer adds req.file
@@ -70,7 +64,7 @@ export class LeaveController {
     const startDate = new Date(start_date);
     const endDate = new Date(end_date);
     const total_days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)) + 1;
-    const application = await prisma.leaveApplication.create({
+    const application = await leaveDb.leaveApplication.create({
       data: {
         personnel_id: personnel.id,
         leave_type_id,
@@ -90,9 +84,9 @@ export class LeaveController {
     const { id } = req.params;
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
+    const personnel = await personnelDb.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, error: { message: 'Personnel record not found' } });
-    const existing = await prisma.leaveApplication.findFirst({ where: { id, personnel_id: personnel.id, status: 'Pending' } });
+    const existing = await leaveDb.leaveApplication.findFirst({ where: { id, personnel_id: personnel.id, status: 'Pending' } });
     if (!existing) return res.status(404).json({ success: false, error: { message: 'Application not found or cannot be updated' } });
     const { leave_type_id, start_date, end_date, reason, supporting_document } = req.body;
     let total_days = existing.total_days;
@@ -101,7 +95,7 @@ export class LeaveController {
       const endDate = new Date(end_date);
       total_days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)) + 1;
     }
-    const application = await prisma.leaveApplication.update({
+    const application = await leaveDb.leaveApplication.update({
       where: { id },
       data: {
         leave_type_id,
@@ -120,26 +114,26 @@ export class LeaveController {
     const { id } = req.params;
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
+    const personnel = await personnelDb.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, error: { message: 'Personnel record not found' } });
-    const existing = await prisma.leaveApplication.findFirst({ where: { id, personnel_id: personnel.id, status: 'Pending' } });
+    const existing = await leaveDb.leaveApplication.findFirst({ where: { id, personnel_id: personnel.id, status: 'Pending' } });
     if (!existing) return res.status(404).json({ success: false, error: { message: 'Application not found or cannot be cancelled' } });
-    await prisma.leaveApplication.delete({ where: { id } });
+    await leaveDb.leaveApplication.delete({ where: { id } });
     res.json({ success: true, message: 'Leave application cancelled successfully' });
   }
 
   static async approveLeaveApplication(req: AuthRequest, res: Response) {
     const { id } = req.params;
     const { comments } = req.body;
-    const application = await prisma.leaveApplication.findUnique({ where: { id }, include: { personnel: true, leave_type: true } });
+    const application = await leaveDb.leaveApplication.findUnique({ where: { id }, include: { leave_type: true } });
     if (!application) return res.status(404).json({ success: false, error: { message: 'Application not found' } });
     if (application.status !== 'Pending') return res.status(400).json({ success: false, error: { message: 'Application is not pending approval' } });
-    const updated = await prisma.leaveApplication.update({
+    const updated = await leaveDb.leaveApplication.update({
       where: { id },
       data: { status: 'Approved', approved_by: req.user?.id, approval_date: new Date(), approval_comments: comments }
     });
     const currentYear = new Date().getFullYear().toString();
-    await prisma.leaveBalance.updateMany({
+    await leaveDb.leaveBalance.updateMany({
       where: { personnel_id: application.personnel_id, leave_type_id: application.leave_type_id, year: currentYear },
       data: { used_credits: { increment: application.total_days }, last_updated: new Date() }
     });
@@ -149,22 +143,22 @@ export class LeaveController {
   static async rejectLeaveApplication(req: AuthRequest, res: Response) {
     const { id } = req.params;
     const { comments } = req.body;
-    const application = await prisma.leaveApplication.findUnique({ where: { id } });
+    const application = await leaveDb.leaveApplication.findUnique({ where: { id } });
     if (!application) return res.status(404).json({ success: false, error: { message: 'Application not found' } });
     if (application.status !== 'Pending') return res.status(400).json({ success: false, error: { message: 'Application is not pending approval' } });
-    const updated = await prisma.leaveApplication.update({ where: { id }, data: { status: 'Rejected', approved_by: req.user?.id, approval_date: new Date(), approval_comments: comments } });
+    const updated = await leaveDb.leaveApplication.update({ where: { id }, data: { status: 'Rejected', approved_by: req.user?.id, approval_date: new Date(), approval_comments: comments } });
     res.json({ success: true, data: updated });
   }
 
   static async getLeaveTypes(req: Request, res: Response) {
-    const types = await prisma.leaveType.findMany({ orderBy: { leave_type_name: 'asc' } });
+    const types = await leaveDb.leaveType.findMany({ orderBy: { leave_type_name: 'asc' } });
     res.json({ success: true, data: types });
   }
 
   static async createLeaveType(req: Request, res: Response) {
     const { leave_type_name, description, requires_document, max_days } = req.body;
     if (!leave_type_name) return res.status(400).json({ success: false, error: { message: 'Leave type name is required' } });
-    const type = await prisma.leaveType.create({
+    const type = await leaveDb.leaveType.create({
       data: { leave_type_name, description, requires_document: requires_document || false, max_days, is_active: true }
     });
     res.status(201).json({ success: true, data: type });
@@ -173,27 +167,27 @@ export class LeaveController {
   static async updateLeaveType(req: Request, res: Response) {
     const { id } = req.params;
     const { leave_type_name, description, requires_document, max_days, is_active } = req.body;
-    const type = await prisma.leaveType.update({ where: { id }, data: { leave_type_name, description, requires_document, max_days, is_active } });
+    const type = await leaveDb.leaveType.update({ where: { id }, data: { leave_type_name, description, requires_document, max_days, is_active } });
     res.json({ success: true, data: type });
   }
 
   static async deleteLeaveType(req: Request, res: Response) {
     const { id } = req.params;
-    const usedInApplications = await prisma.leaveApplication.findFirst({ where: { leave_type_id: id } });
+    const usedInApplications = await leaveDb.leaveApplication.findFirst({ where: { leave_type_id: id } });
     if (usedInApplications) return res.status(400).json({ success: false, error: { message: 'Cannot delete leave type that is being used in leave applications' } });
-    const usedInBalances = await prisma.leaveBalance.findFirst({ where: { leave_type_id: id } });
+    const usedInBalances = await leaveDb.leaveBalance.findFirst({ where: { leave_type_id: id } });
     if (usedInBalances) return res.status(400).json({ success: false, error: { message: 'Cannot delete leave type that has associated leave balances' } });
-    const type = await prisma.leaveType.delete({ where: { id } });
+    const type = await leaveDb.leaveType.delete({ where: { id } });
     res.json({ success: true, data: type });
   }
 
   static async getMyLeaveBalance(req: AuthRequest, res: Response) {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
+    const personnel = await personnelDb.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, error: { message: 'Personnel record not found' } });
     const year = new Date().getFullYear().toString();
-    const balances = await prisma.leaveBalance.findMany({
+    const balances = await leaveDb.leaveBalance.findMany({
       where: { personnel_id: personnel.id, year },
       include: { leave_type: true },
       orderBy: { leave_type: { leave_type_name: 'asc' } }
@@ -204,9 +198,9 @@ export class LeaveController {
   static async getPersonnelLeaveBalance(req: Request, res: Response) {
     const { personnel_id } = req.params as any;
     const { year = new Date().getFullYear().toString() } = req.query as any;
-    const balances = await prisma.leaveBalance.findMany({
+    const balances = await leaveDb.leaveBalance.findMany({
       where: { personnel_id, year },
-      include: { leave_type: true, personnel: { select: { first_name: true, last_name: true } } },
+      include: { leave_type: true },
       orderBy: { leave_type: { leave_type_name: 'asc' } }
     });
     res.json({ success: true, data: balances });
@@ -215,11 +209,11 @@ export class LeaveController {
   static async initializeLeaveBalance(req: Request, res: Response) {
     const { personnel_id, year, leave_type_id, total_credits } = req.body;
     if (!personnel_id || !year || !leave_type_id || total_credits === undefined) return res.status(400).json({ success: false, error: { message: 'Missing required fields' } });
-    const balance = await prisma.leaveBalance.upsert({
+    const balance = await leaveDb.leaveBalance.upsert({
       where: { personnel_id_leave_type_id_year: { personnel_id, leave_type_id, year } },
       update: { total_credits, last_updated: new Date() },
       create: { personnel_id, leave_type_id, year, total_credits, used_credits: 0, earned_credits: 0 },
-      include: { leave_type: true, personnel: { select: { first_name: true, last_name: true } } }
+      include: { leave_type: true }
     });
     res.status(201).json({ success: true, data: balance });
   }
@@ -227,13 +221,12 @@ export class LeaveController {
   static async bulkInitializeLeaveBalances(req: Request, res: Response) {
     const { year } = req.body as any;
     const currentYear = year || new Date().getFullYear().toString();
-    const allPersonnel = await prisma.personnel.findMany({
-      where: { user: { status: 'Active' } },
-      select: { id: true, first_name: true, last_name: true, department: { select: { department_name: true } } },
+    const allPersonnel = await personnelDb.personnel.findMany({
+      select: { id: true, first_name: true, last_name: true },
       orderBy: [{ last_name: 'asc' }, { first_name: 'asc' }]
     });
-    const allLeaveTypes = await prisma.leaveType.findMany({ orderBy: { leave_type_name: 'asc' } });
-    const existingBalances = await prisma.leaveBalance.findMany({ where: { year: currentYear }, select: { personnel_id: true, leave_type_id: true } });
+    const allLeaveTypes = await leaveDb.leaveType.findMany({ orderBy: { leave_type_name: 'asc' } });
+    const existingBalances = await leaveDb.leaveBalance.findMany({ where: { year: currentYear }, select: { personnel_id: true, leave_type_id: true } });
     const existingSet = new Set(existingBalances.map(b => `${b.personnel_id}-${b.leave_type_id}`));
     const bulkCreateData: any[] = [];
     let initializedCount = 0;
@@ -252,7 +245,7 @@ export class LeaveController {
       }
     }
     if (bulkCreateData.length > 0) {
-      await prisma.leaveBalance.createMany({ data: bulkCreateData, skipDuplicates: true });
+      await leaveDb.leaveBalance.createMany({ data: bulkCreateData, skipDuplicates: true });
     }
     res.json({ success: true, data: { year: currentYear, initializedCount } });
   }
@@ -260,9 +253,9 @@ export class LeaveController {
   static async previewBulkInitializeLeaveBalances(req: Request, res: Response) {
     const { year } = req.query as any;
     const currentYear = year || new Date().getFullYear().toString();
-    const allPersonnel = await prisma.personnel.findMany({ where: { user: { status: 'Active' } }, select: { id: true, first_name: true, last_name: true, department: { select: { department_name: true } } }, orderBy: [{ last_name: 'asc' }, { first_name: 'asc' }] });
-    const allLeaveTypes = await prisma.leaveType.findMany({ orderBy: { leave_type_name: 'asc' } });
-    const existingBalances = await prisma.leaveBalance.findMany({ where: { year: currentYear }, select: { personnel_id: true, leave_type_id: true } });
+    const allPersonnel = await personnelDb.personnel.findMany({ select: { id: true, first_name: true, last_name: true }, orderBy: [{ last_name: 'asc' }, { first_name: 'asc' }] });
+    const allLeaveTypes = await leaveDb.leaveType.findMany({ orderBy: { leave_type_name: 'asc' } });
+    const existingBalances = await leaveDb.leaveBalance.findMany({ where: { year: currentYear }, select: { personnel_id: true, leave_type_id: true } });
     const existingSet = new Set(existingBalances.map(b => `${b.personnel_id}-${b.leave_type_id}`));
     let potentialInitializedCount = 0;
     for (const person of allPersonnel) {
@@ -282,14 +275,14 @@ export class LeaveController {
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
     const [requests, total] = await Promise.all([
-      prisma.leaveMonetization.findMany({
+      leaveDb.leaveMonetization.findMany({
         where,
-        include: { personnel: { select: { id: true, first_name: true, last_name: true } }, leave_type: true },
+        include: { leave_type: true },
         skip,
         take,
         orderBy: { request_date: 'desc' }
       }),
-      prisma.leaveMonetization.count({ where })
+      leaveDb.leaveMonetization.count({ where })
     ]);
     res.json({ success: true, data: { requests, pagination: { page: Number(page), limit: Number(limit), total, totalPages: Math.ceil(total / Number(limit)) } } });
   }
@@ -297,11 +290,11 @@ export class LeaveController {
   static async createLeaveMonetization(req: AuthRequest, res: Response) {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
+    const personnel = await personnelDb.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, error: { message: 'Personnel record not found' } });
     const { leave_type_id, days_to_monetize } = req.body;
     if (!leave_type_id || !days_to_monetize) return res.status(400).json({ success: false, error: { message: 'Missing required fields' } });
-    const request = await prisma.leaveMonetization.create({ data: { personnel_id: personnel.id, leave_type_id, days_to_monetize, status: 'Pending' }, include: { leave_type: true } });
+    const request = await leaveDb.leaveMonetization.create({ data: { personnel_id: personnel.id, leave_type_id, days_to_monetize, status: 'Pending' }, include: { leave_type: true } });
     res.status(201).json({ success: true, data: request });
   }
 
@@ -310,7 +303,7 @@ export class LeaveController {
     const { amount } = req.body;
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, error: { message: 'Unauthorized' } });
-    const request = await prisma.leaveMonetization.update({ where: { id }, data: { status: 'Approved', amount, approved_by: userId, approval_date: new Date() }, include: { leave_type: true, personnel: { select: { first_name: true, last_name: true } } } });
+    const request = await leaveDb.leaveMonetization.update({ where: { id }, data: { status: 'Approved', amount, approved_by: userId, approval_date: new Date() }, include: { leave_type: true } });
     res.json({ success: true, data: request });
   }
 
@@ -320,15 +313,14 @@ export class LeaveController {
     if (start_date && end_date) where.start_date = { gte: new Date(start_date), lte: new Date(end_date) };
     if (leave_type_id) where.leave_type_id = leave_type_id;
     if (department_id) where.personnel = { department_id };
-    const [totalApplications, approvedApplications, pendingApplications, rejectedApplications, byLeaveType, byDepartment] = await Promise.all([
-      prisma.leaveApplication.count({ where }),
-      prisma.leaveApplication.count({ where: { ...where, status: 'Approved' } }),
-      prisma.leaveApplication.count({ where: { ...where, status: 'Pending' } }),
-      prisma.leaveApplication.count({ where: { ...where, status: 'Rejected' } }),
-      prisma.leaveApplication.groupBy({ by: ['leave_type_id'], where, _count: { id: true }, _sum: { total_days: true } }),
-      prisma.leaveApplication.groupBy({ by: ['personnel_id'], where, _count: { id: true }, _sum: { total_days: true } })
+    const [totalApplications, approvedApplications, pendingApplications, rejectedApplications, byLeaveType] = await Promise.all([
+      leaveDb.leaveApplication.count({ where }),
+      leaveDb.leaveApplication.count({ where: { ...where, status: 'Approved' } }),
+      leaveDb.leaveApplication.count({ where: { ...where, status: 'Pending' } }),
+      leaveDb.leaveApplication.count({ where: { ...where, status: 'Rejected' } }),
+      leaveDb.leaveApplication.groupBy({ by: ['leave_type_id'], where, _count: { id: true }, _sum: { total_days: true } })
     ]);
-    res.json({ success: true, data: { total_applications: totalApplications, approved: approvedApplications, pending: pendingApplications, rejected: rejectedApplications, by_leave_type: byLeaveType, by_department: byDepartment } });
+    res.json({ success: true, data: { total_applications: totalApplications, approved: approvedApplications, pending: pendingApplications, rejected: rejectedApplications, by_leave_type: byLeaveType } });
   }
 
   static async getLeaveBalanceReport(req: Request, res: Response) {
@@ -339,14 +331,14 @@ export class LeaveController {
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
     const [balances, total] = await Promise.all([
-      prisma.leaveBalance.findMany({
+      leaveDb.leaveBalance.findMany({
         where,
-        include: { personnel: { select: { id: true, first_name: true, last_name: true, department: { select: { id: true, department_name: true } } } }, leave_type: true },
+        include: { leave_type: true },
         skip,
         take,
-        orderBy: [ { personnel: { department: { department_name: 'asc' } } }, { personnel: { last_name: 'asc' } } ]
+        orderBy: [ { leave_type: { leave_type_name: 'asc' } } ]
       }),
-      prisma.leaveBalance.count({ where })
+      leaveDb.leaveBalance.count({ where })
     ]);
     res.json({ success: true, data: balances, pagination: { page: Number(page), limit: Number(limit), total, totalPages: Math.ceil(total / Number(limit)) } });
   }
@@ -365,7 +357,7 @@ export class LeaveController {
     if (Number(adjustment_amount) <= 0) {
       return res.status(400).json({ success: false, error: { message: 'Adjustment amount must be greater than 0' } });
     }
-    const currentBalance = await prisma.leaveBalance.findUnique({
+    const currentBalance = await leaveDb.leaveBalance.findUnique({
       where: { personnel_id_leave_type_id_year: { personnel_id, leave_type_id, year } }
     });
     if (!currentBalance) {
@@ -376,7 +368,7 @@ export class LeaveController {
     if (newBalance < 0) {
       return res.status(400).json({ success: false, error: { message: 'Adjustment would result in negative balance' } });
     }
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await leaveDb.$transaction(async (tx) => {
       const adjustment = await tx.leaveAdjustment.create({
         data: {
           personnel_id,
@@ -409,8 +401,8 @@ export class LeaveController {
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
     const [items, total] = await Promise.all([
-      prisma.leaveAdjustment.findMany({ where, skip, take, orderBy: { created_at: 'desc' } }),
-      prisma.leaveAdjustment.count({ where })
+      leaveDb.leaveAdjustment.findMany({ where, skip, take, orderBy: { created_at: 'desc' } }),
+      leaveDb.leaveAdjustment.count({ where })
     ]);
     res.json({ success: true, data: items, pagination: { page: Number(page), limit: Number(limit), total, totalPages: Math.ceil(total / Number(limit)) } });
   }
@@ -422,8 +414,8 @@ export class LeaveController {
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
     const [items, total] = await Promise.all([
-      prisma.leaveAdjustment.findMany({ where, skip, take, orderBy: { created_at: 'desc' } }),
-      prisma.leaveAdjustment.count({ where })
+      leaveDb.leaveAdjustment.findMany({ where, skip, take, orderBy: { created_at: 'desc' } }),
+      leaveDb.leaveAdjustment.count({ where })
     ]);
     res.json({ success: true, data: items, pagination: { page: Number(page), limit: Number(limit), total, totalPages: Math.ceil(total / Number(limit)) } });
   }

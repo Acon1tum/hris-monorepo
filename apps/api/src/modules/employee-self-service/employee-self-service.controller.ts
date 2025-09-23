@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { prisma } from '@hris/db';
+import { accounts, personnel as personnelDb } from '../../db/clients';
 import { AuthRequest } from '../../middleware/auth';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -49,11 +49,10 @@ export class EmployeeSelfServiceController {
   static async getMyProfile(req: AuthRequest, res: Response) {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
-    const personnel = await prisma.personnel.findFirst({ 
+    const personnel = await personnelDb.personnel.findFirst({ 
       where: { user_id: userId }, 
       include: { 
         department: true, 
-        user: true, 
         job_title: true 
       } 
     });
@@ -70,14 +69,14 @@ export class EmployeeSelfServiceController {
       gender, civilStatus, employmentType, designation, department, appointmentDate,
       gsis, pagibig, philhealth, sss
     } = req.body;
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
+    const personnel = await personnelDb.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, message: 'Profile not found' });
     let departmentId: string | undefined = undefined;
     if (department) {
-      const dept = await prisma.department.findFirst({ where: { department_name: department } });
+      const dept = await personnelDb.department.findFirst({ where: { department_name: department } });
       if (dept) departmentId = dept.id;
     }
-    await prisma.personnel.update({
+    await personnelDb.personnel.update({
       where: { id: personnel.id },
       data: {
         first_name: firstName,
@@ -99,7 +98,7 @@ export class EmployeeSelfServiceController {
       }
     });
     if (email) {
-      await prisma.user.update({ where: { id: userId }, data: { email } });
+      await accounts.user.update({ where: { id: userId }, data: { email } });
     }
     res.json({ success: true, message: 'Profile updated successfully' });
   }
@@ -107,16 +106,16 @@ export class EmployeeSelfServiceController {
   static async getMyDocuments(req: AuthRequest, res: Response) {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
+    const personnel = await personnelDb.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, message: 'Personnel not found' });
-    const documents = await prisma.employeeDocument.findMany({ where: { personnelId: personnel.id }, orderBy: { createdAt: 'desc' } });
+    const documents = await personnelDb.employeeDocument.findMany({ where: { personnelId: personnel.id }, orderBy: { createdAt: 'desc' } });
     res.json({ success: true, data: documents });
   }
 
   static async uploadDocument(req: AuthRequest, res: Response) {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
+    const personnel = await personnelDb.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, message: 'Personnel not found' });
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
     const { title, description, category } = req.body;
@@ -127,7 +126,7 @@ export class EmployeeSelfServiceController {
     const fileName = `${randomUUID()}${fileExtension}`;
     const filePath = path.join(uploadsDir, fileName);
     fs.renameSync(file.path, filePath);
-    const document = await prisma.employeeDocument.create({
+    const document = await personnelDb.employeeDocument.create({
       data: {
         personnelId: personnel.id,
         title,
@@ -146,13 +145,13 @@ export class EmployeeSelfServiceController {
     const userId = req.user?.id;
     const { id } = req.params as any;
     if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
-    const personnel = await prisma.personnel.findFirst({ where: { user_id: userId } });
+    const personnel = await personnelDb.personnel.findFirst({ where: { user_id: userId } });
     if (!personnel) return res.status(404).json({ success: false, message: 'Personnel not found' });
-    const document = await prisma.employeeDocument.findFirst({ where: { id, personnelId: personnel.id } });
+    const document = await personnelDb.employeeDocument.findFirst({ where: { id, personnelId: personnel.id } });
     if (!document) return res.status(404).json({ success: false, message: 'Document not found' });
     const filePath = path.join(__dirname, '../../../', document.fileUrl);
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    await prisma.employeeDocument.delete({ where: { id } });
+    await personnelDb.employeeDocument.delete({ where: { id } });
     res.json({ success: true, message: 'Document deleted successfully' });
   }
 }

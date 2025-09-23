@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/@prisma/client-personnel"
+  output   = "../../../node_modules/@prisma/client-personnel"
 }
 
 datasource db {
@@ -89,6 +89,8 @@ model Department {
   parent_department   Department? @relation("DepartmentToDepartment", fields: [parent_department_id], references: [id])
   departments         Department[] @relation("DepartmentToDepartment")
   personnel           Personnel[]
+  previous_movements  PersonnelMovement[] @relation("PreviousDepartment")
+  new_movements       PersonnelMovement[] @relation("NewDepartment")
 }
 
 model JobTitle {
@@ -106,6 +108,8 @@ model JobTitle {
   created_at                DateTime @default(now())
   updated_at                DateTime @updatedAt
   personnel                 Personnel[]
+  previous_movements        PersonnelMovement[] @relation("PreviousJobTitle")
+  new_movements             PersonnelMovement[] @relation("NewJobTitle")
 }
 
 model Personnel {
@@ -143,6 +147,9 @@ model Personnel {
   employeeProfile      EmployeeSelfServiceProfile?
   courses_instructed   Course[]
   course_enrollments   CourseEnrollment[]
+  personnel_movement   PersonnelMovement[]
+  merits_violations    MeritViolation[]
+  administrative_cases AdministrativeCase[]
 }
 
 model EmploymentHistory {
@@ -154,6 +161,90 @@ model EmploymentHistory {
   end_date       DateTime?
   employment_type EmploymentType
   personnel      Personnel @relation(fields: [personnel_id], references: [id])
+}
+
+model PersonnelMovement {
+  id                    String   @id @default(uuid())
+  personnel_id          String
+  movement_type         MovementType
+  previous_department_id String?
+  new_department_id     String?
+  previous_job_title_id String?
+  new_job_title_id      String?
+  previous_salary       Float?
+  new_salary            Float?
+  previous_item_number  String?
+  new_item_number       String?
+  effective_date        DateTime
+  issued_by             String
+  issued_date           DateTime
+  remarks               String?
+  document_path         String?
+  created_at            DateTime  @default(now())
+  personnel             Personnel @relation(fields: [personnel_id], references: [id])
+  previous_department   Department? @relation("PreviousDepartment", fields: [previous_department_id], references: [id])
+  new_department        Department? @relation("NewDepartment", fields: [new_department_id], references: [id])
+  previous_job_title    JobTitle?   @relation("PreviousJobTitle", fields: [previous_job_title_id], references: [id])
+  new_job_title         JobTitle?   @relation("NewJobTitle", fields: [new_job_title_id], references: [id])
+}
+
+enum MovementType {
+  Promotion
+  Transfer
+  Re_employment
+  Reinstatement
+  Voluntary_Demotion
+  Disciplinary_Demotion
+  Reclassification
+  Reassignment
+  Detail
+  Designation
+  Probationary_Period
+  Item_Number_Change
+  Step_Increment
+  Salary_Adjustment
+  Reinstatement_Same_Position
+}
+
+model MeritViolation {
+  id             String   @id @default(uuid())
+  personnel_id   String
+  record_type    RecordType
+  description    String
+  date_recorded  DateTime
+  documented_by  String
+  document_path  String?
+  created_at     DateTime @default(now())
+  personnel      Personnel @relation(fields: [personnel_id], references: [id])
+}
+
+enum RecordType {
+  Merit
+  Violation
+}
+
+model AdministrativeCase {
+  id               String   @id @default(uuid())
+  personnel_id     String
+  case_title       String
+  case_description String
+  case_status      CaseStatus  @default(Filed)
+  date_filed       DateTime
+  resolution       String?
+  resolution_date  DateTime?
+  sanctions        String?
+  filed_by         String
+  document_path    String?
+  created_at       DateTime    @default(now())
+  personnel        Personnel   @relation(fields: [personnel_id], references: [id])
+}
+
+enum CaseStatus {
+  Filed
+  Under_Investigation
+  Resolved
+  Dismissed
+  Appealed
 }
 
 model WorkSchedule {

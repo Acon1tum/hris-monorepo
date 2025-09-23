@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
-import { prisma } from '@hris/db';
+import { PrismaClient as JobClient } from '@prisma/client-job-portal';
+
+const jobDb = new JobClient();
 
 type EmploymentType = 'Plantilla' | 'Contractual' | 'Casual' | 'Contract_Of_Service';
 
@@ -52,11 +54,12 @@ export class JobPortalManagementController {
       employment_type,
       num_vacancies,
       application_deadline,
-      posting_status
+      posting_status,
+      experience_level = 'Mid_Level',
+      job_category = 'Information_Technology'
     } = req.body as any;
 
-    // Ensure a JobTitle exists for the provided position_title
-    const jobTitle = await prisma.jobTitle.upsert({
+    const jobTitle = await jobDb.jobTitle.upsert({
       where: { title: position_title },
       update: { employment_type: toPrismaEmploymentType(employment_type) },
       create: {
@@ -65,7 +68,7 @@ export class JobPortalManagementController {
       }
     });
 
-    const created = await prisma.jobPosting.create({
+    const created = await jobDb.jobPosting.create({
       data: {
         job_title_id: jobTitle.id,
         department_id,
@@ -77,11 +80,13 @@ export class JobPortalManagementController {
         num_vacancies: Number(num_vacancies ?? 1),
         application_deadline: toDate(application_deadline),
         posting_status: posting_status as any,
+        experience_level: experience_level as any,
+        job_category: job_category as any,
         created_by: (req as any).user?.id
       }
     });
 
-    const withIncludes = await prisma.jobPosting.findUnique({
+    const withIncludes = await jobDb.jobPosting.findUnique({
       where: { id: created.id },
       include: {
         job_title: true,
@@ -94,7 +99,7 @@ export class JobPortalManagementController {
     res.status(201).json({ success: true, data: mapPostingToDto(withIncludes) });
   }
   static async getAllJobPostings(req: Request, res: Response) {
-    const items = await prisma.jobPosting.findMany({
+    const items = await jobDb.jobPosting.findMany({
       orderBy: { created_at: 'desc' },
       include: {
         job_title: true,
@@ -107,7 +112,7 @@ export class JobPortalManagementController {
   }
   static async getJobPosting(req: Request, res: Response) {
     const { id } = req.params as any;
-    const item = await prisma.jobPosting.findUnique({
+    const item = await jobDb.jobPosting.findUnique({
       where: { id },
       include: {
         job_title: true,
@@ -131,19 +136,20 @@ export class JobPortalManagementController {
       employment_type,
       num_vacancies,
       application_deadline,
-      posting_status
+      posting_status,
+      experience_level,
+      job_category
     } = req.body as any;
 
-    // If position_title provided, ensure JobTitle exists/updated
     const jobTitle = position_title
-      ? await prisma.jobTitle.upsert({
+      ? await jobDb.jobTitle.upsert({
           where: { title: position_title },
           update: { employment_type: toPrismaEmploymentType(employment_type) },
           create: { title: position_title, employment_type: toPrismaEmploymentType(employment_type) }
         })
       : null;
 
-    const updated = await prisma.jobPosting.update({
+    const updated = await jobDb.jobPosting.update({
       where: { id },
       data: {
         ...(jobTitle ? { job_title_id: jobTitle.id } : {}),
@@ -155,11 +161,13 @@ export class JobPortalManagementController {
         ...(employment_type ? { employment_type: toPrismaEmploymentType(employment_type) as any } : {}),
         ...(num_vacancies !== undefined ? { num_vacancies: Number(num_vacancies) } : {}),
         ...(application_deadline ? { application_deadline: toDate(application_deadline) } : {}),
-        ...(posting_status ? { posting_status: posting_status as any } : {})
+        ...(posting_status ? { posting_status: posting_status as any } : {}),
+        ...(experience_level ? { experience_level: experience_level as any } : {}),
+        ...(job_category ? { job_category: job_category as any } : {})
       }
     });
 
-    const withIncludes = await prisma.jobPosting.findUnique({
+    const withIncludes = await jobDb.jobPosting.findUnique({
       where: { id: updated.id },
       include: {
         job_title: true,
@@ -174,8 +182,8 @@ export class JobPortalManagementController {
   static async updateJobPostingStatus(req: Request, res: Response) {
     const { id } = req.params as any;
     const { status } = req.body as any;
-    const updated = await prisma.jobPosting.update({ where: { id }, data: { posting_status: status as any } });
-    const withIncludes = await prisma.jobPosting.findUnique({
+    const updated = await jobDb.jobPosting.update({ where: { id }, data: { posting_status: status as any } });
+    const withIncludes = await jobDb.jobPosting.findUnique({
       where: { id: updated.id },
       include: { job_title: true, department: true, created_by_user: true, _count: { select: { job_applications: true } } }
     });
@@ -183,41 +191,40 @@ export class JobPortalManagementController {
   }
   static async deleteJobPosting(req: Request, res: Response) {
     const { id } = req.params as any;
-    await prisma.jobPosting.delete({ where: { id } });
+    await jobDb.jobPosting.delete({ where: { id } });
     res.json({ success: true });
   }
 
   static async getAllApplications(req: Request, res: Response) {
-    const items = await prisma.jobApplication.findMany({ orderBy: [{ id: 'desc' }] });
+    const items = await jobDb.jobApplication.findMany({ orderBy: [{ id: 'desc' }] });
     res.json({ success: true, data: items });
   }
   static async getApplication(req: Request, res: Response) {
     const { id } = req.params as any;
-    const item = await prisma.jobApplication.findUnique({ where: { id } });
+    const item = await jobDb.jobApplication.findUnique({ where: { id } });
     if (!item) return res.status(404).json({ success: false, error: { message: 'Not found' } });
     res.json({ success: true, data: item });
   }
   static async updateApplicationStatus(req: Request, res: Response) {
     const { id } = req.params as any;
     const { status } = req.body as any;
-    const updated = await prisma.jobApplication.update({ where: { id }, data: { status } });
+    const updated = await jobDb.jobApplication.update({ where: { id }, data: { status } });
     res.json({ success: true, data: updated });
   }
 
   static async getDashboard(req: Request, res: Response) {
     const [postings, applications] = await Promise.all([
-      prisma.jobPosting.count(),
-      prisma.jobApplication.count()
+      jobDb.jobPosting.count(),
+      jobDb.jobApplication.count()
     ]);
     res.json({ success: true, data: { postings, applications } });
   }
 
   static async getDepartments(req: Request, res: Response) {
-    const depts = await prisma.department.findMany({ orderBy: { department_name: 'asc' } });
+    const depts = await jobDb.department.findMany({ orderBy: { department_name: 'asc' } });
     res.json({ success: true, data: depts });
   }
   static async getSalaryRanges(req: Request, res: Response) {
-    // Serve static salary ranges to avoid DB dependency for now
     const ranges = [
       { id: '1', range: '₱15,000 - ₱25,000', min: 15000, max: 25000 },
       { id: '2', range: '₱25,000 - ₱35,000', min: 25000, max: 35000 },
