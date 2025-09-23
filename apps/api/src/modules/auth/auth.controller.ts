@@ -81,14 +81,15 @@ export class AuthController {
       const user = await this.authService.createUser({
         email,
         password: hashedPassword,
-        username
+        username,
+        role
       });
 
       // Generate JWT token
       const secret: jwt.Secret = config.jwtSecret;
       const options: jwt.SignOptions = { expiresIn: config.jwtExpiresIn as unknown as jwt.SignOptions['expiresIn'] };
       const token = jwt.sign(
-        { id: user.id, email: user.email },
+        { id: user.id, email: user.email, role: user.role },
         secret,
         options
       );
@@ -96,7 +97,7 @@ export class AuthController {
       res.status(201).json({
         success: true,
         data: {
-          user: { id: user.id, email: user.email, username: user.username },
+          user: { id: user.id, email: user.email, username: user.username, role: user.role },
           token
         }
       });

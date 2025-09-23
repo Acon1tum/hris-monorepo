@@ -8,14 +8,77 @@ import { PrismaClient as ReportsClient } from '@prisma/client-reports';
 import { PrismaClient as SystemClient } from '@prisma/client-system';
 import { PrismaClient as JobClient } from '@prisma/client-job';
 
-export const accounts = new AccountsClient();
-export const personnel = new PersonnelClient();
-export const attendance = new AttendanceClient();
-export const leaveDb = new LeaveClient();
-export const payroll = new PayrollClient();
-export const performance = new PerformanceClient();
-export const reports = new ReportsClient();
-export const system = new SystemClient();
-export const job = new JobClient();
+// Initialize clients with proper error handling
+export const accounts = new AccountsClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL_ACCOUNTS
+    }
+  }
+});
+
+export const personnel = new PersonnelClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL_PERSONNEL
+    }
+  }
+});
+
+export const attendance = new AttendanceClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL_ATTENDANCE
+    }
+  }
+});
+
+export const leaveDb = new LeaveClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL_LEAVE
+    }
+  }
+});
+
+export const payroll = new PayrollClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL_PAYROLL
+    }
+  }
+});
+
+export const performance = new PerformanceClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL_PERFORMANCE
+    }
+  }
+});
+
+export const reports = new ReportsClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL_REPORTS
+    }
+  }
+});
+
+export const system = new SystemClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL_SYSTEM
+    }
+  }
+});
+
+export const job = new JobClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL_JOB_PORTAL
+    }
+  }
+});
 
 

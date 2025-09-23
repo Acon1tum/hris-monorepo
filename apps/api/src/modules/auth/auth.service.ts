@@ -4,6 +4,7 @@ export interface CreateUserData {
   email: string;
   password: string; // hashed
   username: string;
+  role?: string;
 }
 
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
         email: data.email,
         username: data.username,
         password: data.password,
+        role: data.role as any || 'Employee',
         isActive: true
       }
     });

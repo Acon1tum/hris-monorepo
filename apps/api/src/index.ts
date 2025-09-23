@@ -11,8 +11,11 @@ import { notFoundHandler } from './middleware/notFoundHandler';
 import routes from './routes';
 import { config } from './config';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from root .env file
+dotenv.config({ path: '../../.env' });
+
+// Debug: Log database URL (remove in production)
+console.log('DATABASE_URL_ACCOUNTS:', process.env.DATABASE_URL_ACCOUNTS);
 
 const app: Application = express();
 const PORT = config.port || 3000;
