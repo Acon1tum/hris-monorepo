@@ -1,0 +1,38 @@
+{
+  "name": "@hris/job-portal-db",
+  "version": "1.0.0",
+  "description": "Job Portal Database Package",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "pnpm db:generate && tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset",
+    "db:deploy": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "prisma": "^5.7.1",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "job-portal",
+    "database",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "HRIS Team",
+  "license": "MIT"
+}
+
+
+

@@ -22,7 +22,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node prisma/seed.ts",
+    "db:seed": "pnpm db:generate && ts-node prisma/seed.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

@@ -1,0 +1,728 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-job"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_JOB_PORTAL")
+}
+
+// Enums
+enum RoleType {
+  Admin
+  HR
+  Employee
+  Manager
+  Applicant
+  Recruiter
+  Hiring_Manager
+}
+
+enum Status {
+  Active
+  Inactive
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum EmploymentType {
+  // Non-Plantilla positions
+  Casual
+  Contractual
+  Contract_Of_Service
+  // Plantilla positions
+  Plantilla
+  // Additional job portal types
+  Full_Time
+  Part_Time
+  Internship
+  Freelance
+  Temporary
+}
+
+enum SalaryGrade {
+  SG_1
+  SG_2
+  SG_3
+  SG_4
+  SG_5
+  SG_6
+  SG_7
+  SG_8
+  SG_9
+  SG_10
+  SG_11
+  SG_12
+  SG_13
+  SG_14
+  SG_15
+  SG_16
+  SG_17
+  SG_18
+  SG_19
+  SG_20
+  SG_21
+  SG_22
+  SG_23
+  SG_24
+  SG_25
+  SG_26
+  SG_27
+  SG_28
+  SG_29
+  SG_30
+  SG_31
+  SG_32
+  SG_33
+}
+
+enum PositionClassification {
+  Professional_Supervisory
+  Professional_Non_Supervisory
+  Sub_Professional_Supervisory
+  Sub_Professional_Non_Supervisory
+  Executive_Managerial
+  Clerical
+  Trades_Crafts_Labor
+}
+
+enum PostingStatus {
+  Draft
+  Published
+  Closed
+  Filled
+  Cancelled
+}
+
+enum ApplicationStatus {
+  Pending
+  Pre_Screening
+  For_Interview
+  For_Examination
+  Shortlisted
+  Selected
+  Rejected
+  Withdrawn
+  Hired
+  On_Hold
+}
+
+enum InterviewType {
+  Phone
+  Video
+  On_Site
+  Panel
+  Technical
+  HR
+  Final
+}
+
+enum InterviewStatus {
+  Scheduled
+  Completed
+  Cancelled
+  Rescheduled
+  No_Show
+}
+
+enum ExamStatus {
+  Scheduled
+  Completed
+  Cancelled
+  In_Progress
+}
+
+enum ExamResult {
+  Passed
+  Failed
+  Pending
+  Exempted
+}
+
+enum Recommendation {
+  Hire
+  Consider
+  Reject
+  Strong_Hire
+  Strong_Reject
+}
+
+enum JobCategory {
+  Administrative
+  Technical
+  Management
+  Sales
+  Marketing
+  Finance
+  Human_Resources
+  Operations
+  Customer_Service
+  Information_Technology
+  Healthcare
+  Education
+  Legal
+  Engineering
+  Other
+}
+
+enum WorkArrangement {
+  On_Site
+  Remote
+  Hybrid
+  Flexible
+}
+
+enum ExperienceLevel {
+  Entry_Level
+  Mid_Level
+  Senior_Level
+  Executive
+  Intern
+}
+
+enum EducationLevel {
+  High_School
+  Associate
+  Bachelor
+  Master
+  Doctorate
+  Professional_Certification
+  Vocational
+}
+
+enum SkillLevel {
+  Beginner
+  Intermediate
+  Advanced
+  Expert
+}
+
+enum NotificationType {
+  Application_Status_Update
+  Interview_Scheduled
+  Interview_Reminder
+  Exam_Scheduled
+  Job_Recommendation
+  Application_Deadline
+  New_Job_Posting
+  General
+}
+
+enum DocumentType {
+  Resume
+  Cover_Letter
+  Portfolio
+  Certificate
+  Transcript
+  Recommendation_Letter
+  Work_Sample
+  Other
+}
+
+// Core Models
+model User {
+  id              String   @id @default(uuid())
+  username        String   @unique
+  password_hash   String
+  email           String   @unique
+  profile_picture String?
+  status          Status   @default(Active)
+  role            RoleType
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  
+  // Relations
+  job_applicants  JobApplicant[]
+  job_postings    JobPosting[]
+  interviews      InterviewSchedule[]
+  examinations    ExaminationSchedule[]
+  assessments     ApplicantAssessment[]
+  notifications   Notification[]
+  saved_jobs      SavedJob[]
+  job_alerts      JobAlert[]
+  user_documents  UserDocument[]
+  audit_logs      AuditLog[]
+  job_views       JobView[]
+  application_notes ApplicationNote[]
+  personnel       Personnel[]
+}
+
+model Department {
+  id                  String   @id @default(uuid())
+  department_name     String   @unique
+  department_head     String?
+  parent_department_id String?
+  description         String?
+  agency_code         String?
+  office_code         String?
+  is_plantilla_unit   Boolean  @default(false)
+  created_at          DateTime @default(now())
+  
+  // Relations
+  parent_department   Department? @relation("DepartmentHierarchy", fields: [parent_department_id], references: [id])
+  sub_departments     Department[] @relation("DepartmentHierarchy")
+  job_postings        JobPosting[]
+  personnel           Personnel[]
+}
+
+model JobTitle {
+  id                      String   @id @default(uuid())
+  title                   String   @unique
+  description             String?
+  employment_type         EmploymentType
+  salary_grade            SalaryGrade?
+  position_classification PositionClassification?
+  plantilla_item_number   String?
+  csc_eligibility_required Boolean @default(false)
+  salary_min              Float?
+  salary_max              Float?
+  is_active               Boolean  @default(true)
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+  
+  // Relations
+  job_postings            JobPosting[]
+  personnel               Personnel[]
+}
+
+model Personnel {
+  id              String   @id @default(uuid())
+  user_id         String?  @unique
+  first_name      String
+  last_name       String
+  middle_name     String?
+  date_of_birth   DateTime?
+  gender          Gender?
+  contact_number  String?
+  address         String?
+  department_id   String?
+  job_title_id    String?
+  employment_type EmploymentType
+  date_hired      DateTime?
+  salary          Float
+  gsis_number     String?
+  pagibig_number  String?
+  philhealth_number String?
+  sss_number      String?
+  tin_number      String?
+  csc_eligibility String?
+  csc_eligibility_date DateTime?
+  plantilla_item_number String?
+  agency_code     String?
+  office_code     String?
+  created_at      DateTime @default(now())
+  
+  // Relations
+  user            User?       @relation(fields: [user_id], references: [id])
+  department      Department? @relation(fields: [department_id], references: [id])
+  job_title       JobTitle?   @relation(fields: [job_title_id], references: [id])
+}
+
+model JobPosting {
+  id                      String   @id @default(uuid())
+  job_title_id            String
+  department_id           String
+  job_description         String
+  qualifications          String
+  technical_competencies  String?
+  salary_range            String?
+  employment_type         EmploymentType
+  work_arrangement        WorkArrangement @default(On_Site)
+  experience_level        ExperienceLevel
+  education_level         EducationLevel?
+  num_vacancies           Int      @default(1)
+  application_deadline    DateTime
+  posting_status          PostingStatus @default(Draft)
+  job_category            JobCategory
+  location                String?
+  benefits                String?
+  requirements            String?
+  responsibilities        String?
+  skills_required         String[]
+  tags                    String[]
+  is_featured             Boolean  @default(false)
+  is_urgent               Boolean  @default(false)
+  views_count             Int      @default(0)
+  applications_count      Int      @default(0)
+  created_by              String
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+  
+  // Relations
+  job_title               JobTitle    @relation(fields: [job_title_id], references: [id])
+  department              Department  @relation(fields: [department_id], references: [id])
+  created_by_user         User        @relation(fields: [created_by], references: [id])
+  job_applications        JobApplication[]
+  saved_jobs              SavedJob[]
+  job_alerts              JobAlert[]
+  job_views               JobView[]
+  job_skills              JobSkill[]
+}
+
+model JobApplicant {
+  id                  String   @id @default(uuid())
+  user_id             String   @unique
+  first_name          String
+  last_name           String
+  middle_name         String?
+  email               String
+  phone               String
+  current_employer    String?
+  highest_education   String?
+  years_of_experience Int?
+  current_salary      Float?
+  expected_salary     Float?
+  availability        DateTime?
+  resume_path         String?
+  cover_letter_template String?
+  is_existing_employee Boolean @default(false)
+  is_verified         Boolean @default(false)
+  profile_completion  Int      @default(0) // Percentage
+  application_date    DateTime @default(now())
+  last_active         DateTime @default(now())
+  
+  // Relations
+  user                User        @relation(fields: [user_id], references: [id])
+  job_applications    JobApplication[]
+  applicant_skills    ApplicantSkill[]
+  work_experiences    WorkExperience[]
+  educations          Education[]
+  certifications      Certification[]
+}
+
+model JobApplication {
+  id                  String   @id @default(uuid())
+  position_id         String
+  applicant_id        String
+  cover_letter        String?
+  status              ApplicationStatus @default(Pending)
+  application_date    DateTime @default(now())
+  withdrawn_date      DateTime?
+  remarks             String?
+  source              String?  // Where they found the job
+  referral_source     String?
+  expected_start_date DateTime?
+  salary_expectation  Float?
+  availability        String?
+  additional_info     String?
+  
+  // Relations
+  position            JobPosting  @relation(fields: [position_id], references: [id])
+  applicant           JobApplicant @relation(fields: [applicant_id], references: [id])
+  application_documents ApplicationDocument[]
+  interview_schedules InterviewSchedule[]
+  examination_schedules ExaminationSchedule[]
+  assessments         ApplicantAssessment[]
+  application_notes   ApplicationNote[]
+}
+
+model ApplicationDocument {
+  id                  String   @id @default(uuid())
+  application_id      String
+  document_type       DocumentType
+  document_path       String
+  file_name           String
+  file_size           Int
+  upload_date         DateTime @default(now())
+  is_required         Boolean  @default(false)
+  
+  // Relations
+  application         JobApplication @relation(fields: [application_id], references: [id])
+}
+
+model InterviewSchedule {
+  id                  String   @id @default(uuid())
+  application_id      String
+  interviewer_id      String
+  interview_date      DateTime
+  interview_type      InterviewType
+  interview_status    InterviewStatus @default(Scheduled)
+  interview_location  String?
+  interview_notes     String?
+  rating              Float?
+  feedback            String?
+  duration_minutes    Int?
+  meeting_link        String?
+  reminder_sent       Boolean  @default(false)
+  
+  // Relations
+  application         JobApplication @relation(fields: [application_id], references: [id])
+  interviewer         User        @relation(fields: [interviewer_id], references: [id])
+}
+
+model ExaminationSchedule {
+  id                  String   @id @default(uuid())
+  application_id      String
+  exam_type           String
+  exam_date           DateTime
+  exam_location       String?
+  exam_status         ExamStatus @default(Scheduled)
+  score               Float?
+  passing_score       Float?
+  result              ExamResult @default(Pending)
+  examiner_id         String?
+  notes               String?
+  duration_minutes    Int?
+  instructions        String?
+  
+  // Relations
+  application         JobApplication @relation(fields: [application_id], references: [id])
+  examiner            User?       @relation(fields: [examiner_id], references: [id])
+}
+
+model ApplicantAssessment {
+  id                  String   @id @default(uuid())
+  application_id      String
+  assessor_id         String
+  assessment_date     DateTime @default(now())
+  criteria_technical  Float?
+  criteria_experience Float?
+  criteria_education  Float?
+  criteria_communication Float?
+  criteria_cultural_fit Float?
+  criteria_problem_solving Float?
+  criteria_leadership Float?
+  overall_rating      Float?
+  comments            String?
+  recommendation      Recommendation
+  strengths           String?
+  weaknesses          String?
+  improvement_areas   String?
+  
+  // Relations
+  application         JobApplication @relation(fields: [application_id], references: [id])
+  assessor            User        @relation(fields: [assessor_id], references: [id])
+}
+
+model SavedJob {
+  id                  String   @id @default(uuid())
+  user_id             String
+  job_posting_id      String
+  saved_date          DateTime @default(now())
+  notes               String?
+  
+  // Relations
+  user                User        @relation(fields: [user_id], references: [id])
+  job_posting         JobPosting  @relation(fields: [job_posting_id], references: [id])
+  
+  @@unique([user_id, job_posting_id])
+}
+
+model JobAlert {
+  id                  String   @id @default(uuid())
+  user_id             String
+  job_posting_id      String?
+  keywords            String[]
+  job_categories      JobCategory[]
+  employment_types    EmploymentType[]
+  experience_levels   ExperienceLevel[]
+  work_arrangements   WorkArrangement[]
+  salary_min          Float?
+  salary_max          Float?
+  location            String?
+  is_active           Boolean  @default(true)
+  frequency           String   @default("daily") // daily, weekly, monthly
+  last_sent           DateTime?
+  created_at          DateTime @default(now())
+  
+  // Relations
+  user                User        @relation(fields: [user_id], references: [id])
+  job_posting         JobPosting? @relation(fields: [job_posting_id], references: [id])
+}
+
+model JobView {
+  id                  String   @id @default(uuid())
+  job_posting_id      String
+  user_id             String?
+  ip_address          String?
+  user_agent          String?
+  viewed_at           DateTime @default(now())
+  session_id          String?
+  
+  // Relations
+  job_posting         JobPosting @relation(fields: [job_posting_id], references: [id])
+  user                User?      @relation(fields: [user_id], references: [id])
+}
+
+model Skill {
+  id                  String   @id @default(uuid())
+  skill_name          String   @unique
+  category            String?
+  description         String?
+  is_active           Boolean  @default(true)
+  created_at          DateTime @default(now())
+  
+  // Relations
+  applicant_skills    ApplicantSkill[]
+  job_skills          JobSkill[]
+}
+
+model ApplicantSkill {
+  id                  String   @id @default(uuid())
+  applicant_id        String
+  skill_id            String
+  skill_level         SkillLevel
+  years_of_experience Int?
+  is_verified         Boolean  @default(false)
+  verified_by         String?
+  verified_at         DateTime?
+  
+  // Relations
+  applicant           JobApplicant @relation(fields: [applicant_id], references: [id])
+  skill               Skill        @relation(fields: [skill_id], references: [id])
+  
+  @@unique([applicant_id, skill_id])
+}
+
+model JobSkill {
+  id                  String   @id @default(uuid())
+  job_posting_id      String
+  skill_id            String
+  is_required         Boolean  @default(true)
+  skill_level         SkillLevel?
+  years_required      Int?
+  
+  // Relations
+  job_posting         JobPosting @relation(fields: [job_posting_id], references: [id])
+  skill               Skill      @relation(fields: [skill_id], references: [id])
+  
+  @@unique([job_posting_id, skill_id])
+}
+
+model WorkExperience {
+  id                  String   @id @default(uuid())
+  applicant_id        String
+  company_name        String
+  position            String
+  start_date          DateTime
+  end_date            DateTime?
+  is_current          Boolean  @default(false)
+  description         String?
+  achievements        String?
+  salary              Float?
+  location            String?
+  
+  // Relations
+  applicant           JobApplicant @relation(fields: [applicant_id], references: [id])
+}
+
+model Education {
+  id                  String   @id @default(uuid())
+  applicant_id        String
+  institution         String
+  degree              String
+  field_of_study      String?
+  start_date          DateTime
+  end_date            DateTime?
+  is_current          Boolean  @default(false)
+  gpa                 Float?
+  description         String?
+  location            String?
+  
+  // Relations
+  applicant           JobApplicant @relation(fields: [applicant_id], references: [id])
+}
+
+model Certification {
+  id                  String   @id @default(uuid())
+  applicant_id        String
+  certification_name  String
+  issuing_organization String
+  issue_date          DateTime
+  expiry_date         DateTime?
+  credential_id       String?
+  credential_url      String?
+  description         String?
+  
+  // Relations
+  applicant           JobApplicant @relation(fields: [applicant_id], references: [id])
+}
+
+model ApplicationNote {
+  id                  String   @id @default(uuid())
+  application_id      String
+  note_content        String
+  created_by          String
+  created_at          DateTime @default(now())
+  is_internal         Boolean  @default(true)
+  
+  // Relations
+  application         JobApplication @relation(fields: [application_id], references: [id])
+  created_by_user     User          @relation(fields: [created_by], references: [id])
+}
+
+model Notification {
+  id                  String   @id @default(uuid())
+  user_id             String
+  notification_type   NotificationType
+  title               String
+  message             String
+  is_read             Boolean  @default(false)
+  read_at             DateTime?
+  action_url          String?
+  created_at          DateTime @default(now())
+  
+  // Relations
+  user                User        @relation(fields: [user_id], references: [id])
+}
+
+model UserDocument {
+  id                  String   @id @default(uuid())
+  user_id             String
+  title               String
+  description         String?
+  file_url            String
+  file_type           String
+  file_size           Int
+  category            String
+  is_private          Boolean  @default(false)
+  uploaded_at         DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  
+  // Relations
+  user                User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id                  String   @id @default(uuid())
+  user_id             String?
+  action_type         String
+  table_affected      String
+  record_id           String
+  action_details      String?
+  ip_address          String?
+  user_agent          String?
+  timestamp           DateTime @default(now())
+  
+  // Relations
+  user                User?    @relation(fields: [user_id], references: [id])
+}
+
+model SystemSetting {
+  id                  String   @id @default(uuid())
+  setting_key         String   @unique
+  setting_value       String
+  description         String?
+  is_public           Boolean  @default(false)
+  updated_at          DateTime @updatedAt
+}
+
+model JobPortalAnalytics {
+  id                  String   @id @default(uuid())
+  date                DateTime @default(now())
+  total_job_postings  Int      @default(0)
+  total_applications  Int      @default(0)
+  total_users         Int      @default(0)
+  total_views         Int      @default(0)
+  applications_today  Int      @default(0)
+  jobs_posted_today   Int      @default(0)
+  active_jobs         Int      @default(0)
+  closed_jobs         Int      @default(0)
+  
+  @@unique([date])
+}

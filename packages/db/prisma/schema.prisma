@@ -1,10 +1,11 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-hris"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL_HRIS")
 }
 enum RoleType {
   Admin
@@ -366,7 +367,6 @@ model Personnel {
   date_of_birth   DateTime?
   gender          Gender?
   civil_status    CivilStatus?
-  citizenship     String?     @default("Filipino")
   contact_number  String?
   address         String?
   department_id   String?
