@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-performance"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_PERFORMANCE")
+}
+
+enum ReviewStatus {
+  Draft
+  Submitted
+  Reviewed
+  Acknowledged
+}
+
+enum EvaluationStatus {
+  Draft
+  Submitted
+  Reviewed
+  Finalized
+}
+
+model PerformanceReview {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  reviewer_id         String
+  review_period_start DateTime
+  review_period_end   DateTime
+  review_date         DateTime
+  performance_score   Float?
+  strengths           String?
+  areas_for_improvement String?
+  goals               String?
+  status              ReviewStatus @default(Draft)
+}
+
+model PerformanceEvaluation {
+  id                       String   @id @default(uuid())
+  personnel_id             String
+  reviewer_id              String
+  evaluation_period_start  DateTime
+  evaluation_period_end    DateTime
+  evaluation_date          DateTime    @default(now())
+  self_assessment          String?
+  manager_comments         String?
+  peer_feedback            String?
+  kpi_score                Float?
+  overall_performance_score Float?
+  strengths                String?
+  areas_for_improvement    String?
+  recommended_training     String?
+  status                   EvaluationStatus @default(Draft)
+}
+
+

@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-reports"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_REPORTS")
+}
+
+model Report {
+  id                String   @id @default(uuid())
+  report_name       String
+  generated_by      String
+  file_path         String
+  digital_signature String?
+  created_at        DateTime @default(now())
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  user_id      String
+  action_type  String
+  table_affected String
+  record_id    String
+  action_details String?
+  ip_address   String?
+  user_agent   String?
+  timestamp    DateTime @default(now())
+}
+
+model Notification {
+  id                String   @id @default(uuid())
+  user_id           String
+  notification_type String?
+  message           String
+  is_read           Boolean  @default(false)
+  created_at        DateTime @default(now())
+}
+
+

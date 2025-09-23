@@ -1,0 +1,289 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-personnel"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_PERSONNEL")
+}
+
+// Enums
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum CivilStatus {
+  Single
+  Married
+  Divorced
+  Widowed
+}
+
+enum EmploymentType {
+  Casual
+  Contractual
+  Contract_Of_Service
+  Plantilla
+}
+
+enum SalaryGrade {
+  SG_1
+  SG_2
+  SG_3
+  SG_4
+  SG_5
+  SG_6
+  SG_7
+  SG_8
+  SG_9
+  SG_10
+  SG_11
+  SG_12
+  SG_13
+  SG_14
+  SG_15
+  SG_16
+  SG_17
+  SG_18
+  SG_19
+  SG_20
+  SG_21
+  SG_22
+  SG_23
+  SG_24
+  SG_25
+  SG_26
+  SG_27
+  SG_28
+  SG_29
+  SG_30
+  SG_31
+  SG_32
+  SG_33
+}
+
+enum PositionClassification {
+  Professional_Supervisory
+  Professional_Non_Supervisory
+  Sub_Professional_Supervisory
+  Sub_Professional_Non_Supervisory
+  Executive_Managerial
+  Clerical
+  Trades_Crafts_Labor
+}
+
+// Models
+model Department {
+  id                  String   @id @default(uuid())
+  department_name     String   @unique
+  department_head     String?
+  parent_department_id String?
+  description         String?
+  agency_code         String?
+  office_code         String?
+  is_plantilla_unit   Boolean  @default(false)
+  created_at          DateTime @default(now())
+  parent_department   Department? @relation("DepartmentToDepartment", fields: [parent_department_id], references: [id])
+  departments         Department[] @relation("DepartmentToDepartment")
+  personnel           Personnel[]
+}
+
+model JobTitle {
+  id                        String   @id @default(uuid())
+  title                     String   @unique
+  description               String?
+  employment_type           EmploymentType
+  salary_grade              SalaryGrade?
+  position_classification   PositionClassification?
+  plantilla_item_number     String?
+  csc_eligibility_required  Boolean  @default(false)
+  salary_min                Float?
+  salary_max                Float?
+  is_active                 Boolean  @default(true)
+  created_at                DateTime @default(now())
+  updated_at                DateTime @updatedAt
+  personnel                 Personnel[]
+}
+
+model Personnel {
+  id                   String   @id @default(uuid())
+  user_id              String?  // cross-db reference to accounts.User.id
+  first_name           String
+  last_name            String
+  middle_name          String?
+  date_of_birth        DateTime?
+  gender               Gender?
+  civil_status         CivilStatus?
+  contact_number       String?
+  address              String?
+  department_id        String?
+  job_title_id         String?
+  employment_type      EmploymentType
+  date_hired           DateTime?
+  salary               Float
+  gsis_number          String?
+  pagibig_number       String?
+  philhealth_number    String?
+  sss_number           String?
+  tin_number           String?
+  csc_eligibility      String?
+  csc_eligibility_date DateTime?
+  plantilla_item_number String?
+  agency_code          String?
+  office_code          String?
+  created_at           DateTime @default(now())
+  department           Department? @relation(fields: [department_id], references: [id])
+  job_title            JobTitle?   @relation(fields: [job_title_id], references: [id])
+  employment_history   EmploymentHistory[]
+  personnel_schedules  PersonnelSchedule[]
+  employeeDocuments    EmployeeDocument[]
+  employeeProfile      EmployeeSelfServiceProfile?
+  courses_instructed   Course[]
+  course_enrollments   CourseEnrollment[]
+}
+
+model EmploymentHistory {
+  id             String   @id @default(uuid())
+  personnel_id   String
+  organization   String
+  position       String
+  start_date     DateTime
+  end_date       DateTime?
+  employment_type EmploymentType
+  personnel      Personnel @relation(fields: [personnel_id], references: [id])
+}
+
+model WorkSchedule {
+  id                String   @id @default(uuid())
+  schedule_name     String
+  is_flextime       Boolean  @default(false)
+  start_time        DateTime?
+  end_time          DateTime?
+  break_start_time  DateTime?
+  break_end_time    DateTime?
+  break_deducted    Boolean  @default(true)
+  is_work_from_home Boolean  @default(false)
+  created_at        DateTime @default(now())
+  personnel_schedules PersonnelSchedule[]
+}
+
+model PersonnelSchedule {
+  id            String   @id @default(uuid())
+  personnel_id  String
+  schedule_id   String
+  start_date    DateTime
+  end_date      DateTime?
+  created_by    String
+  created_at    DateTime @default(now())
+  personnel     Personnel   @relation(fields: [personnel_id], references: [id])
+  work_schedule WorkSchedule @relation(fields: [schedule_id], references: [id])
+}
+
+model EmployeeSelfServiceProfile {
+  id             String   @id @default(uuid())
+  personnelId    String   @unique
+  personnel      Personnel @relation(fields: [personnelId], references: [id])
+  profilePicture String?
+  bio            String?
+  skills         String[]
+  certifications String[]
+  education      Education[]
+  workExperience WorkExperience[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Education {
+  id          String   @id @default(uuid())
+  profileId   String
+  profile     EmployeeSelfServiceProfile @relation(fields: [profileId], references: [id])
+  institution String
+  degree      String
+  fieldOfStudy String
+  startDate   DateTime
+  endDate     DateTime?
+  isCurrent   Boolean  @default(false)
+  description String?
+}
+
+model WorkExperience {
+  id          String   @id @default(uuid())
+  profileId   String
+  profile     EmployeeSelfServiceProfile @relation(fields: [profileId], references: [id])
+  company     String
+  position    String
+  startDate   DateTime
+  endDate     DateTime?
+  isCurrent   Boolean  @default(false)
+  description String?
+}
+
+model EmployeeDocument {
+  id          String   @id @default(uuid())
+  personnelId String?
+  personnel   Personnel? @relation(fields: [personnelId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  fileUrl     String
+  fileType    String
+  fileSize    Int
+  category    String
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Lightweight learning models referenced in Personnel
+model Course {
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  objectives   String[]
+  prerequisites String[]
+  duration     Int
+  level        String
+  status       String  @default("Draft")
+  instructorId String
+  instructor   Personnel @relation(fields: [instructorId], references: [id])
+  category     String
+  tags         String[]
+  thumbnailUrl String?
+  modules      CourseModule[]
+  enrollments  CourseEnrollment[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CourseModule {
+  id          String  @id @default(uuid())
+  courseId    String
+  course      Course  @relation(fields: [courseId], references: [id])
+  title       String
+  description String
+  order       Int
+  duration    Int
+  content     String
+  resources   String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CourseEnrollment {
+  id           String   @id @default(uuid())
+  courseId     String
+  course       Course   @relation(fields: [courseId], references: [id])
+  personnelId  String
+  personnel    Personnel @relation(fields: [personnelId], references: [id])
+  enrollmentDate DateTime @default(now())
+  completionDate DateTime?
+  status       String   @default("ENROLLED")
+  progress     Int      @default(0)
+  lastAccessedAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+

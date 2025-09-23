@@ -1,0 +1,30 @@
+{
+  "name": "@hris/accounts-db",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Accounts/Auth Database package with Prisma ORM",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "pnpm db:generate && ts-node prisma/seed.ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "prisma": "^5.22.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
+    "rimraf": "^5.0.5"
+  }
+}
+
+

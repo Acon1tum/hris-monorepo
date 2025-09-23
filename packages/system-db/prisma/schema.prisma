@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-system"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_SYSTEM")
+}
+
+enum ApprovalStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+enum RequestType {
+  Leave
+  Payroll
+  Recruitment
+}
+
+model SystemSetting {
+  id            String   @id @default(uuid())
+  setting_key   String   @unique
+  setting_value String
+}
+
+model SystemModule {
+  id              String   @id @default(uuid())
+  module_name     String   @unique
+  is_active       Boolean  @default(true)
+  can_be_disabled Boolean  @default(true)
+  last_updated    DateTime @default(now())
+}
+
+model Approval {
+  id            String   @id @default(uuid())
+  request_type  RequestType
+  request_id    String
+  approval_step Int      @default(1)
+  status        ApprovalStatus @default(Pending)
+  approved_by   String?
+  approval_date DateTime?
+}
+
+

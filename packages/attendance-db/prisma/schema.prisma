@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-attendance"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_ATTENDANCE")
+}
+
+// Enums
+enum AttendanceStatus {
+  Present
+  Absent
+  Late
+  On_Leave
+  Work_From_Home
+}
+
+enum ApprovalStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+// Models
+model AttendanceLog {
+  id             String   @id @default(uuid())
+  personnel_id   String
+  log_date       DateTime
+  time_in        DateTime?
+  time_out       DateTime?
+  total_hours    Float?
+  status         AttendanceStatus
+  biometric_used Boolean   @default(true)
+  evidence_path  String?
+}
+
+model DtrAdjustmentRequest {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  log_date            DateTime
+  original_time_in    DateTime?
+  original_time_out   DateTime?
+  requested_time_in   DateTime?
+  requested_time_out  DateTime?
+  reason              String
+  supporting_document String?
+  status              ApprovalStatus @default(Pending)
+  request_date        DateTime    @default(now())
+  approved_by         String
+  approval_date       DateTime?
+}
+
+

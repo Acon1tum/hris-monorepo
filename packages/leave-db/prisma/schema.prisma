@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-leave"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_LEAVE")
+}
+
+enum ApprovalStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+model LeaveType {
+  id                String   @id @default(uuid())
+  leave_type_name   String
+  description       String?
+  requires_document Boolean  @default(false)
+  max_days          Int?
+  is_active         Boolean  @default(true)
+  created_at        DateTime @default(now())
+}
+
+model LeaveBalance {
+  id            String   @id @default(uuid())
+  personnel_id  String
+  leave_type_id String
+  year          String
+  total_credits Float
+  used_credits  Float   @default(0.00)
+  earned_credits Float  @default(0.00)
+  last_updated  DateTime @default(now())
+
+  @@unique([personnel_id, leave_type_id, year])
+}
+
+model LeaveAdjustment {
+  id               String   @id @default(uuid())
+  personnel_id     String
+  leave_type_id    String
+  year             String
+  adjustment_type  String
+  adjustment_amount Float
+  reason           String
+  previous_balance Float
+  new_balance      Float
+  created_by       String
+  created_at       DateTime @default(now())
+}
+
+model LeaveApplication {
+  id                  String   @id @default(uuid())
+  personnel_id        String
+  leave_type_id       String
+  start_date          DateTime
+  end_date            DateTime
+  total_days          Float
+  status              ApprovalStatus @default(Pending)
+  reason              String?
+  supporting_document String?
+  request_date        DateTime @default(now())
+  approved_by         String?
+  approval_date       DateTime?
+  approval_comments   String?
+}
+
+model LeaveMonetization {
+  id             String   @id @default(uuid())
+  personnel_id   String
+  leave_type_id  String
+  days_to_monetize Float
+  status         ApprovalStatus @default(Pending)
+  amount         Float?
+  request_date   DateTime @default(now())
+  approved_by    String?
+  approval_date  DateTime?
+}
+
+

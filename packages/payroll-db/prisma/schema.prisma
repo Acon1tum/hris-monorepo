@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-payroll"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_PAYROLL")
+}
+
+enum PaymentStatus {
+  Pending
+  Processed
+  Disbursed
+}
+
+model PayrollRecord {
+  id                   String   @id @default(uuid())
+  personnel_id         String
+  payroll_period_start DateTime
+  payroll_period_end   DateTime
+  basic_salary         Float
+  salary_adjustments   Float   @default(0.00)
+  gross_salary         Float
+  total_deductions     Float
+  net_amount_due       Float
+  payment_status       PaymentStatus @default(Pending)
+  bank_account_number  String?
+  processed_date       DateTime @default(now())
+  processed_by         String?
+}
+
+model Deduction {
+  id               String   @id @default(uuid())
+  personnel_id     String
+  payroll_id       String
+  bir              Float   @default(0.00)
+  pagibig          Float   @default(0.00)
+  philhealth       Float   @default(0.00)
+  sss              Float   @default(0.00)
+  loans            Float   @default(0.00)
+  other_deductions Float   @default(0.00)
+}
+
+enum LoanStatus {
+  Active
+  Fully_Paid
+  Delinquent
+}
+
+enum LoanType {
+  Consolidated
+  Policy
+  Multi_Purpose
+  Other
+}
+
+model LoanRecord {
+  id                String   @id @default(uuid())
+  personnel_id      String
+  loan_type         LoanType
+  loan_source       String
+  loan_amount       Float
+  monthly_deduction Float
+  start_date        DateTime
+  end_date          DateTime?
+  remaining_balance Float
+  status            LoanStatus @default(Active)
+  created_at        DateTime @default(now())
+}
+
+
