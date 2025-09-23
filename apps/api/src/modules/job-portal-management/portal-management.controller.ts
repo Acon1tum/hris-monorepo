@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient as JobClient } from '@prisma/client-job-portal';
+import { PrismaClient as JobClient } from '@prisma/client-job';
 
 const jobDb = new JobClient();
 
