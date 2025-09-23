@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import { prisma } from '@hris/db';
+import { job } from '../../db/clients';
 
 export class JobPortalController {
   // Diagnostics
   static async testDatabase(req: Request, res: Response) {
-    const now = await prisma.$queryRaw`SELECT NOW()`;
+    const now = await job.$queryRaw`SELECT NOW()`;
     res.json({ success: true, data: now });
   }
 
@@ -47,7 +47,7 @@ export class JobPortalController {
         where.salary_range = { contains: salary_range as string, mode: 'insensitive' };
       }
 
-      const jobs = await prisma.jobPosting.findMany({
+      const jobs = await job.jobPosting.findMany({
         where,
         include: {
           department: {
@@ -68,7 +68,7 @@ export class JobPortalController {
       });
 
       // Transform the data to match frontend expectations
-      const transformedJobs = jobs.map(job => ({
+      const transformedJobs = jobs.map((job: any) => ({
         id: job.id,
         position_title: job.job_title?.title || 'Unknown Position',
         department_id: job.department_id,
@@ -94,7 +94,7 @@ export class JobPortalController {
   static async getJob(req: Request, res: Response) {
     try {
       const { id } = req.params as any;
-      const job = await prisma.jobPosting.findUnique({ 
+      const jobPosting = await job.jobPosting.findUnique({ 
         where: { id },
         include: {
           department: {
@@ -113,26 +113,26 @@ export class JobPortalController {
         }
       });
       
-      if (!job) {
+      if (!jobPosting) {
         return res.status(404).json({ success: false, error: { message: 'Job not found' } });
       }
 
       // Transform the data to match frontend expectations
       const transformedJob = {
-        id: job.id,
-        position_title: job.job_title?.title || 'Unknown Position',
-        department_id: job.department_id,
-        department: job.department,
-        job_description: job.job_description,
-        qualifications: job.qualifications,
-        technical_competencies: job.technical_competencies,
-        salary_range: job.salary_range,
-        employment_type: job.job_title?.employment_type || job.employment_type,
-        num_vacancies: job.num_vacancies,
-        application_deadline: job.application_deadline,
-        posting_status: job.posting_status,
-        created_at: job.created_at,
-        updated_at: job.created_at
+        id: jobPosting.id,
+        position_title: jobPosting.job_title?.title || 'Unknown Position',
+        department_id: jobPosting.department_id,
+        department: jobPosting.department,
+        job_description: jobPosting.job_description,
+        qualifications: jobPosting.qualifications,
+        technical_competencies: jobPosting.technical_competencies,
+        salary_range: jobPosting.salary_range,
+        employment_type: jobPosting.job_title?.employment_type || jobPosting.employment_type,
+        num_vacancies: jobPosting.num_vacancies,
+        application_deadline: jobPosting.application_deadline,
+        posting_status: jobPosting.posting_status,
+        created_at: jobPosting.created_at,
+        updated_at: jobPosting.created_at
       };
 
       res.json({ success: true, data: transformedJob });
@@ -142,13 +142,13 @@ export class JobPortalController {
     }
   }
   static async createJobPosting(req: Request, res: Response) {
-    const created = await prisma.jobPosting.create({ data: req.body });
+    const created = await job.jobPosting.create({ data: req.body });
     res.status(201).json({ success: true, data: created });
   }
   static async getSalaryRanges(req: Request, res: Response) {
     try {
       // Get unique salary ranges from job postings
-      const salaryRanges = await prisma.jobPosting.findMany({
+      const salaryRanges = await job.jobPosting.findMany({
         select: {
           salary_range: true
         },
@@ -163,8 +163,8 @@ export class JobPortalController {
 
       // Extract and format salary ranges
       const ranges = salaryRanges
-        .map(job => job.salary_range)
-        .filter(range => range && range.trim() !== '')
+        .map((job: { salary_range: string | null }) => job.salary_range)
+        .filter((range: string | null) => range && range.trim() !== '')
         .sort();
 
       res.json({ success: true, data: ranges });
@@ -176,7 +176,7 @@ export class JobPortalController {
   static async getDepartments(req: Request, res: Response) {
     try {
       // Get departments that have published job postings
-      const departments = await prisma.department.findMany({
+      const departments = await job.department.findMany({
         where: {
           job_postings: {
             some: {
@@ -191,7 +191,7 @@ export class JobPortalController {
       });
 
       // Extract just the department names
-      const departmentNames = departments.map(dept => dept.department_name);
+      const departmentNames = departments.map((dept: { department_name: string }) => dept.department_name);
 
       res.json({ success: true, data: departmentNames });
     } catch (error) {
@@ -202,30 +202,30 @@ export class JobPortalController {
 
   // Applications
   static async startApplication(req: Request, res: Response) {
-    const created = await prisma.jobApplication.create({ data: req.body });
+    const created = await job.jobApplication.create({ data: req.body });
     res.status(201).json({ success: true, data: created });
   }
   static async uploadDocuments(req: Request, res: Response) { res.status(201).json({ success: true }); }
   static async answerQuestions(req: Request, res: Response) { res.json({ success: true }); }
   static async submitApplication(req: Request, res: Response) { res.json({ success: true }); }
   static async listApplications(req: Request, res: Response) {
-    const apps = await prisma.jobApplication.findMany({ orderBy: [{ id: 'desc' }] });
+    const apps = await job.jobApplication.findMany({ orderBy: [{ id: 'desc' }] });
     res.json({ success: true, data: apps });
   }
   static async getApplication(req: Request, res: Response) {
     const { id } = req.params as any;
-    const app = await prisma.jobApplication.findUnique({ where: { id } });
+    const app = await job.jobApplication.findUnique({ where: { id } });
     if (!app) return res.status(404).json({ success: false, error: { message: 'Not found' } });
     res.json({ success: true, data: app });
   }
   static async editApplication(req: Request, res: Response) {
     const { id } = req.params as any;
-    const updated = await prisma.jobApplication.update({ where: { id }, data: req.body });
+    const updated = await job.jobApplication.update({ where: { id }, data: req.body });
     res.json({ success: true, data: updated });
   }
   static async cancelApplication(req: Request, res: Response) {
     const { id } = req.params as any;
-    await prisma.jobApplication.delete({ where: { id } });
+    await job.jobApplication.delete({ where: { id } });
     res.json({ success: true });
   }
 

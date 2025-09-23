@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import type { Prisma, User as PrismaUser } from '@prisma/client';
+import { PrismaClient } from '@prisma/client-hris';
+import type { Prisma, User as PrismaUser } from '@prisma/client-hris';
 export type { Prisma };
 export type User = PrismaUser;
 
