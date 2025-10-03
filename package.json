@@ -38,7 +38,7 @@
     "db:generate:all": "pnpm accounts:generate && pnpm personnel:generate && pnpm attendance:generate && pnpm leave:generate && pnpm payroll:generate && pnpm performance:generate && pnpm reports:generate && pnpm system:generate && pnpm db:generate && pnpm job:generate && pnpm lms:generate",
     "db:push:all": "pnpm accounts:push && pnpm personnel:push && pnpm attendance:push && pnpm leave:push && pnpm payroll:push && pnpm performance:push && pnpm reports:push && pnpm system:push && pnpm db:push && pnpm job:push && pnpm lms:push",
     "db:migrate:all": "pnpm accounts:migrate && pnpm personnel:migrate && pnpm attendance:migrate && pnpm leave:migrate && pnpm payroll:migrate && pnpm performance:migrate && pnpm reports:migrate && pnpm system:migrate && pnpm db:migrate && pnpm job:migrate && pnpm lms:migrate",
-    "db:seed:all": "pnpm accounts:seed && pnpm db:seed && pnpm job:seed && pnpm lms:seed",
+    "db:seed:all": "pnpm accounts:seed && pnpm db:seed",
     "db:studio:all": "pnpm db:studio && pnpm job:studio && pnpm lms:studio",
     "help": "node -e \"const m=require('./package.json').scriptsMeta;console.log(JSON.stringify(m,null,2))\"",
 
