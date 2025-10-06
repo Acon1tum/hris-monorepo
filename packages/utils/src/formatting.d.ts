@@ -1,0 +1,9 @@
+export declare const formatCurrency: (amount: number, currency?: string, locale?: string) => string;
+export declare const formatNumber: (number: number, locale?: string) => string;
+export declare const formatPercentage: (value: number, decimals?: number) => string;
+export declare const capitalizeFirst: (str: string) => string;
+export declare const capitalizeWords: (str: string) => string;
+export declare const formatPhoneNumber: (phone: string) => string;
+export declare const formatEmployeeId: (id: string) => string;
+export declare const truncateText: (text: string, maxLength: number) => string;
+//# sourceMappingURL=formatting.d.ts.map
