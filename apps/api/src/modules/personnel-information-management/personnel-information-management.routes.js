@@ -1,0 +1,30 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = require("../../middleware/auth");
+const personnel_controller_1 = require("./personnel.controller");
+const router = (0, express_1.Router)();
+// Protect all endpoints for Admin/HR
+router.use(auth_1.authenticateToken, (0, auth_1.requireRole)(['Admin', 'HR']));
+router.get('/', personnel_controller_1.PersonnelController.getAllPersonnel);
+router.get('/stats', personnel_controller_1.PersonnelController.getPersonnelStats);
+router.get('/dashboard-stats', personnel_controller_1.PersonnelController.getDashboardStats);
+router.get('/:id', personnel_controller_1.PersonnelController.getPersonnelById);
+router.post('/', personnel_controller_1.PersonnelController.createPersonnel);
+router.put('/:id', personnel_controller_1.PersonnelController.updatePersonnel);
+router.delete('/:id', personnel_controller_1.PersonnelController.deletePersonnel);
+router.get('/:id/employment-history', personnel_controller_1.PersonnelController.getEmploymentHistory);
+router.post('/:id/employment-history', personnel_controller_1.PersonnelController.addEmploymentHistory);
+router.get('/:id/membership-data', personnel_controller_1.PersonnelController.getMembershipData);
+router.patch('/:id/membership-data', personnel_controller_1.PersonnelController.updateMembershipData);
+router.get('/:id/merits-violations', personnel_controller_1.PersonnelController.getMeritsViolations);
+router.post('/:id/merits-violations', personnel_controller_1.PersonnelController.addMeritViolation);
+router.get('/:id/admin-cases', personnel_controller_1.PersonnelController.getAdministrativeCases);
+router.post('/:id/admin-cases', personnel_controller_1.PersonnelController.addAdministrativeCase);
+router.get('/:id/movements', personnel_controller_1.PersonnelController.getPersonnelMovements);
+router.post('/:id/movements', personnel_controller_1.PersonnelController.addPersonnelMovement);
+router.get('/dashboard-employees', personnel_controller_1.PersonnelController.getDashboardEmployees);
+router.post('/:id/documents', personnel_controller_1.PersonnelController.uploadDocuments);
+router.get('/:id/documents', personnel_controller_1.PersonnelController.getDocuments);
+exports.default = router;
+//# sourceMappingURL=personnel-information-management.routes.js.map

@@ -1,0 +1,9 @@
+export declare const formatDate: (date: Date | string, format?: "short" | "long" | "time" | "datetime") => string;
+export declare const addDays: (date: Date, days: number) => Date;
+export declare const addMonths: (date: Date, months: number) => Date;
+export declare const addYears: (date: Date, years: number) => Date;
+export declare const getDaysBetween: (startDate: Date, endDate: Date) => number;
+export declare const isWeekend: (date: Date) => boolean;
+export declare const isBusinessDay: (date: Date) => boolean;
+export declare const getBusinessDaysBetween: (startDate: Date, endDate: Date) => number;
+//# sourceMappingURL=date.d.ts.map

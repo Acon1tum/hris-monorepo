@@ -1,0 +1,1 @@
+{"version":3,"file":"view-applicants.component.js","sourceRoot":"","sources":["view-applicants.component.ts"],"names":[],"mappings":";;;;;;;;;AAAA,wCAA0C;AAOnC,IAAM,uBAAuB,GAA7B,MAAM,uBAAuB;CAEnC,CAAA;AAFY,0DAAuB;kCAAvB,uBAAuB;IALnC,IAAA,gBAAS,EAAC;QACT,QAAQ,EAAE,qBAAqB;QAC/B,WAAW,EAAE,kCAAkC;QAC/C,SAAS,EAAE,CAAC,kCAAkC,CAAC;KAChD,CAAC;GACW,uBAAuB,CAEnC"}

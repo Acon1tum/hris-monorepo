@@ -1,0 +1,127 @@
+import { OnInit } from '@angular/core';
+import { Department } from './create-edit-modal/create-edit-modal.component';
+import { Personnel201Service, Personnel201File } from './personnel-201.service';
+import { AuthService } from '../../../services/auth.service';
+export interface AuditTrailEntry {
+    action: 'create' | 'edit' | 'delete';
+    timestamp: string;
+    user: string;
+    details: string;
+}
+export interface Personnel201ModalData {
+    id?: string;
+    firstName: string;
+    middleName: string;
+    lastName: string;
+    suffix: string;
+    email: string;
+    number: string;
+    address: string;
+    department: string;
+    position: string;
+    file?: File | null;
+    birthdate?: string;
+    gender?: string;
+    civilStatus?: string;
+    citizenship?: string;
+    employmentType?: string;
+    designation?: string;
+    appointmentDate?: string;
+    startDate?: string;
+    employmentStatus?: string;
+    jobLevel?: string;
+    jobGrade?: string;
+    gsis?: string;
+    pagibig?: string;
+    philhealth?: string;
+    sss?: string;
+    tin_number?: string;
+    dependents?: string;
+    emergencyContactName?: string;
+    emergencyContactNumber?: string;
+    emergencyContactRelationship?: string;
+    fileName?: string;
+    profilePictureUrl?: string;
+    profilePictureFile?: File | null;
+    username?: string;
+    password?: string;
+    confirmPassword?: string;
+    profilePictureBase64?: string | null;
+}
+export declare class Personnel201FileComponent implements OnInit {
+    private personnelService;
+    private authService;
+    personnelFiles: Personnel201File[];
+    selectedFile: Personnel201File | null;
+    showDetailsModal: boolean;
+    showEditModal: boolean;
+    editMode: 'create' | 'edit';
+    editFileData: Personnel201ModalData;
+    searchTerm: string;
+    loading: boolean;
+    error: string | null;
+    departments: Department[];
+    departmentsLoading: boolean;
+    currentPage: number;
+    pageSize: number;
+    totalRecords: number;
+    totalPages: number;
+    filter: {
+        nameSort: string;
+        department: string;
+        position: string;
+    };
+    positions: string[];
+    Math: Math;
+    pendingFiles: File[];
+    pendingMetas: {
+        title: string;
+        description: string;
+    }[];
+    showDeleteConfirm: boolean;
+    showTypeConfirm: boolean;
+    deleteConfirmInput: string;
+    employeeToDelete: Personnel201File | null;
+    deleteDelay: number;
+    deleteCountdown: number;
+    private deleteTimer;
+    showNoDocumentsNotification: boolean;
+    downloadDocumentsLoading: boolean;
+    constructor(personnelService: Personnel201Service, authService: AuthService);
+    ngOnInit(): void;
+    private getEmptyModalData;
+    loadPersonnelFiles(): void;
+    loadDepartments(): void;
+    onSearch(): void;
+    get filteredPersonnelFiles(): Personnel201File[];
+    get isFilterActive(): boolean;
+    clearFilters(): void;
+    openEditModal(mode: 'create' | 'edit', data?: Personnel201File): void;
+    handleModalSave(modalData: Personnel201ModalData): void;
+    handleUploadDocuments(event: {
+        files: File[];
+        metas: {
+            title: string;
+            description: string;
+        }[];
+    }): void;
+    private createPersonnel;
+    private updatePersonnel;
+    private uploadDocumentsToBackend;
+    handleModalCancel(): void;
+    viewFile(file: Personnel201File): void;
+    deleteFile(file: Personnel201File): void;
+    closeDeleteConfirm(): void;
+    onDeleteButtonClick(): void;
+    confirmDeleteEmployee(): void;
+    downloadEmployeeDocuments(): Promise<void>;
+    closeDetailsModal(): void;
+    openCreateModal(): void;
+    editFile(file: Personnel201File): void;
+    getPageNumbers(): number[];
+    onPageChange(page: number): void;
+    onPageSizeChange(event: Event): void;
+    onUploadDocument(event: Event, personnelId: string): void;
+    refreshPersonnelTable(): void;
+}
+//# sourceMappingURL=personnel-201-file.component.d.ts.map
