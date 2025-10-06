@@ -76,7 +76,7 @@ hris-monorepo/
 
 Start all applications in development mode:
 ```bash
-pnpm dev
+pnpm dev:apps
 ```
 
 Start specific applications:
