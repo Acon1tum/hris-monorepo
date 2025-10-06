@@ -113,6 +113,16 @@ Thumbs.db
 # Prisma
 prisma/migrations/
 
+# TypeScript compiled files
+*.js
+*.d.ts
+*.js.map
+*.d.ts.map
+
+# Keep only .ts source files in src directories
+!apps/api/src/**/*.ts
+!packages/*/src/**/*.ts
+!packages/*/prisma/schema.prisma
 
 .history
 .turbo

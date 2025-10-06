@@ -1,1 +1,0 @@
-{"version":3,"file":"payroll-management.routes.js","sourceRoot":"","sources":["payroll-management.routes.ts"],"names":[],"mappings":";;AAAA,qCAA+D;AAE/D,MAAM,MAAM,GAAkB,IAAA,gBAAM,GAAE,CAAC;AAEvC,MAAM,CAAC,GAAG,CAAC,GAAG,EAAE,CAAC,GAAG,EAAE,GAAG,EAAE,EAAE;IAC3B,GAAG,CAAC,IAAI,CAAC,EAAE,OAAO,EAAE,4CAA4C,EAAE,CAAC,CAAC;AACtE,CAAC,CAAC,CAAC;AAEH,kBAAe,MAAM,CAAC"}
