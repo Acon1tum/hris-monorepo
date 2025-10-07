@@ -69,7 +69,7 @@ hris-monorepo/
 5. Set up seed:
  ```bash
    pnpm db:seed:all // to generate dummy data for all database
-   pnpm (module):seed // for example: pnpm accounts:seed //to generate dummy data for accounts only
+   pnpm (module):push // for example: pnpm accounts:seed //to generate dummy data for accounts only
    ```
 
 ### Development
