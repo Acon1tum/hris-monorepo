@@ -2,8 +2,10 @@
 node_modules/
 .pnp
 .pnp.js
+
 CLAUDE.md 
-*
+GEMINI.md
+QWEN.md
 
 # Production builds
 dist/
