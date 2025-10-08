@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/@prisma/client-accounts"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_ACCOUNTS")
+}
+
+enum RoleType {
+  Admin
+  HR
+  Employee
+  Manager
+  Applicant
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  username   String   @unique
+  password   String
+  firstName  String?
+  lastName   String?
+  role       RoleType @default(Employee)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  accounts   Account[]
+  sessions   Session[]
+}
+
+model Account {
+  id                String   @id @default(uuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  type              String
+  accessToken       String?
+  refreshToken      String?
+  expiresAt         DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  sessionToken String   @unique
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+
+  user User @relation(fields: [userId], references: [id])
+}
