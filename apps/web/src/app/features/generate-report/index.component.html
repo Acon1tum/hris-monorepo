@@ -1,0 +1,43 @@
+<div class="generate-report-container">
+  <h1>Report Generation System</h1>
+  <p>Select a report category from the tabs below</p>
+  
+  <!-- Tabs -->
+  <div class="tabs-container">
+    <div class="tabs">
+      <button 
+        *ngFor="let tab of tabs" 
+        (click)="switchTab(tab.id)"
+        [class.active]="activeTab === tab.id"
+        class="tab-button"
+      >
+        {{ tab.label }}
+      </button>
+    </div>
+  </div>
+  
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <div *ngIf="activeTab === 'attendance-leave'" [ngSwitch]="activeTab">
+      <app-attendance-leave-report *ngSwitchCase="'attendance-leave'"></app-attendance-leave-report>
+    </div>
+    <div *ngIf="activeTab === 'payroll'" [ngSwitch]="activeTab">
+      <app-payroll-report *ngSwitchCase="'payroll'"></app-payroll-report>
+    </div>
+    <div *ngIf="activeTab === 'recruitment'" [ngSwitch]="activeTab">
+      <app-recruitment-report *ngSwitchCase="'recruitment'"></app-recruitment-report>
+    </div>
+    <div *ngIf="activeTab === 'performance'" [ngSwitch]="activeTab">
+      <app-performance-report *ngSwitchCase="'performance'"></app-performance-report>
+    </div>
+    <div *ngIf="activeTab === 'learning-dev'" [ngSwitch]="activeTab">
+      <app-learning-dev-report *ngSwitchCase="'learning-dev'"></app-learning-dev-report>
+    </div>
+    <div *ngIf="activeTab === 'employee-data'" [ngSwitch]="activeTab">
+      <app-employee-data-report *ngSwitchCase="'employee-data'"></app-employee-data-report>
+    </div>
+    <div *ngIf="activeTab === 'management'" [ngSwitch]="activeTab">
+      <app-management-dashboard *ngSwitchCase="'management'"></app-management-dashboard>
+    </div>
+  </div>
+</div>

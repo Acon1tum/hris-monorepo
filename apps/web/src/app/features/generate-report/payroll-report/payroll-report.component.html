@@ -1,0 +1,25 @@
+<div class="payroll-report-container">
+  <div class="header">
+    <h2>Payroll Management Reports</h2>
+    <p>Generate reports related to payroll processing and compensation</p>
+  </div>
+
+  <div class="reports-list">
+    <div class="report-card" *ngFor="let report of reports">
+      <div class="report-header">
+        <h3>{{ report.name }}</h3>
+        <div class="report-meta">
+          <span class="format-badge">{{ report.format }}</span>
+          <span class="frequency-badge">{{ report.frequency }}</span>
+        </div>
+      </div>
+      <p class="report-description">{{ report.description }}</p>
+      <div class="report-actions">
+        <button class="generate-btn" (click)="generateReport(report.id)">
+          Generate Report
+        </button>
+        <button class="preview-btn">Preview</button>
+      </div>
+    </div>
+  </div>
+</div>

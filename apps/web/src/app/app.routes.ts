@@ -7,14 +7,14 @@ import { OnlineJobLoginComponent } from './features/online-job-application-porta
 import { OnlineJobRegisterComponent } from './features/online-job-application-portal/online-job-register/online-job-register.component';
 
 export const routes: Routes = [
-  { 
-    path: '', 
-    redirectTo: '/login', 
-    pathMatch: 'full' 
+  {
+    path: '',
+    redirectTo: '/login',
+    pathMatch: 'full'
   },
   { path: 'login', component: LoginComponent },
-  { 
-    path: 'dashboard', 
+  {
+    path: 'dashboard',
     component: DashboardComponent,
     canActivate: [PermissionGuard],
     data: { roles: ['Admin', 'HR', 'Employee', 'Manager', 'Applicant'] }
@@ -25,8 +25,8 @@ export const routes: Routes = [
     canActivate: [PermissionGuard],
     data: { roles: ['Admin', 'HR'] }
   },
-  
-  { 
+
+  {
     path: 'system-administration',
     loadComponent: () => import('./features/system-administration/index.component').then(m => m.SystemAdministrationComponent),
     canActivate: [PermissionGuard],
@@ -38,7 +38,7 @@ export const routes: Routes = [
     canActivate: [PermissionGuard],
     data: { roles: ['Admin', 'HR'] }
   },
-  
+
   {
     path: 'system-administration/audit-trail',
     loadComponent: () => import('./features/system-administration/audit-trail/audit-trail.component').then(m => m.AuditTrailComponent),
@@ -255,9 +255,15 @@ export const routes: Routes = [
     canActivate: [PermissionGuard],
     data: { roles: ['Employee'] }
   },
+  // {
+  //   path: 'report-generation',
+  //   loadComponent: () => import('./features/report-generation/index.component').then(m => m.ReportGenerationComponent),
+  //   canActivate: [PermissionGuard],
+  //   data: { roles: ['Admin', 'HR', 'Employee', 'Manager'] }
+  // },
   {
-    path: 'report-generation',
-    loadComponent: () => import('./features/report-generation/index.component').then(m => m.ReportGenerationComponent),
+    path: 'generate-report',
+    loadComponent: () => import('./features/generate-report/index.component').then(m => m.GenerateReportComponent),
     canActivate: [PermissionGuard],
     data: { roles: ['Admin', 'HR', 'Employee', 'Manager'] }
   },

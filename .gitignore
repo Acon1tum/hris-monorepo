@@ -6,6 +6,8 @@ node_modules/
 CLAUDE.md 
 GEMINI.md
 QWEN.md
+ai_docs/
+ai_docs/*
 
 # Production builds
 dist/
