@@ -255,12 +255,12 @@ export const routes: Routes = [
     canActivate: [PermissionGuard],
     data: { roles: ['Employee'] }
   },
-  // {
-  //   path: 'report-generation',
-  //   loadComponent: () => import('./features/report-generation/index.component').then(m => m.ReportGenerationComponent),
-  //   canActivate: [PermissionGuard],
-  //   data: { roles: ['Admin', 'HR', 'Employee', 'Manager'] }
-  // },
+  {
+    path: 'report-generation',
+    loadComponent: () => import('./features/report-generation/index.component').then(m => m.ReportGenerationComponent),
+    canActivate: [PermissionGuard],
+    data: { roles: ['Admin', 'HR', 'Employee', 'Manager'] }
+  },
   {
     path: 'generate-report',
     loadComponent: () => import('./features/generate-report/index.component').then(m => m.GenerateReportComponent),

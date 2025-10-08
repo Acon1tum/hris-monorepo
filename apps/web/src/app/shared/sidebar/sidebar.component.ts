@@ -96,8 +96,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
           { name: 'Job Portal Management', icon: 'admin_panel_settings', path: '/job-portal-management' }
         ]
       },
-      // { name: 'Report Generation', icon: 'assessment', path: '/report-generation' },
-      { name: 'Report Generation', icon: 'assessment', path: '/generate-report' },
+      { name: 'Report Generation', icon: 'assessment', path: '/report-generation' },
+      // { name: 'Report Generation', icon: 'assessment', path: '/generate-report' },
       { name: 'Performance Management', icon: 'trending_up', path: '/performance-management' },
       { name: 'Learning & Development', icon: 'school', path: '/learning-development' },
       { name: 'Health & Wellness', icon: 'health_and_safety', path: 'https://quanby-health-care.vercel.app/', external: true, target: '_blank' }
